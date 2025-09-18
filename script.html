@@ -8,6 +8,98 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/awesomplete/1.1.5/awesomplete.min.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/awesomplete/1.1.5/awesomplete.min.js"></script>
     <style>
+        /* Responsive styles for mobile devices */
+        @media (max-width: 900px) {
+            #layout {
+                flex-direction: column;
+                height: auto;
+            }
+            #sidebar {
+                position: static;
+                width: 100vw;
+                min-width: 0;
+                max-width: 100vw;
+                border-right: none;
+                border-bottom: 1px solid #333;
+                padding: 0;
+                z-index: 2;
+            }
+            #sidebar.closed {
+                width: 0;
+                min-width: 0;
+                max-width: 0;
+                overflow: hidden;
+                border-bottom: none;
+                padding: 0;
+            }
+            #main-container {
+                margin-left: 0 !important;
+                width: 100vw !important;
+                max-width: 100vw !important;
+                padding: 10px;
+            }
+            #chatBox {
+                height: calc(100vh - 220px);
+                min-height: 180px;
+                font-size: 15px;
+            }
+            #input-area {
+                flex-direction: row;
+                align-items: center;
+                padding: 8px 0;
+                margin-top: auto;
+            }
+            #userInput {
+                width: 70%;
+                margin-right: 8px;
+                margin-bottom: 0;
+                font-size: 16px;
+                min-height: 48px;
+            }
+            button {
+                width: 44px;
+                height: 44px;
+                font-size: 18px;
+            }
+            h2 {
+                font-size: 18px;
+            }
+            .bubble {
+                max-width: 90vw;
+                font-size: 15px;
+            }
+            .message-row {
+                margin-bottom: 10px;
+            }
+        }
+        @media (max-width: 600px) {
+            body {
+                font-size: 15px;
+                padding: 0;
+            }
+            #sidebar {
+                font-size: 15px;
+            }
+            #main-container {
+                padding: 6px;
+            }
+            #chatBox {
+                height: calc(100vh - 240px);
+                font-size: 14px;
+            }
+            #userInput {
+                font-size: 15px;
+                min-height: 36px;
+            }
+            button {
+                width: 40px;
+                height: 40px;
+                font-size: 16px;
+            }
+            .bubble {
+                font-size: 14px;
+            }
+        }
         body { 
             font-family: Arial, sans-serif; 
             text-align: center; 
@@ -138,10 +230,11 @@
             max-width: 100%;
             width: 0;
             flex: 1 1 0;
+            justify-content: flex-end;
         }
         #chatBox { 
             width: 100%; 
-            height: 460px;
+            height: calc(100vh - 180px);
             border: 1px solid #55567a;
             padding: 8px; 
             background-color: rgba(19, 17, 39, 0.8);
@@ -162,6 +255,7 @@
             padding: 6px 0 10px 0;
             background-color: rgba(18, 18, 18, 0.8);
             flex-shrink: 0;
+            margin-top: auto;
         }
         #userInput { 
             width: 70%; 
@@ -370,15 +464,14 @@
             <h2>Ask a question</h2>
             <div id="chatBox"></div>
             <div id="input-area">
-        <textarea id="userInput" placeholder="Type your question..." rows="3" style="width:70%;padding:10px;border-radius:12px;border:1.5px solid #5e35b1;background:#23223a;color:#fff;font-size:15px;box-shadow:0 2px 8px rgba(92,62,255,0.08);transition:border 0.2s;resize:vertical;"></textarea>
-        <button onclick="sendMessage()" aria-label="Send" title="Send" style="margin-left:8px;display:flex;align-items:center;justify-content:center;width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#7c4dff 0%,#5e35b1 100%);border:none;box-shadow:0 2px 8px rgba(92,62,255,0.15);cursor:pointer;">
-            <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <polygon points="7,24 21,14 7,4" fill="white"/>
-            </svg>
-        </button>
+                <textarea id="userInput" placeholder="Type your question..." rows="3" style="width:70%;padding:10px;border-radius:12px;border:1.5px solid #5e35b1;background:#23223a;color:#fff;font-size:15px;box-shadow:0 2px 8px rgba(92,62,255,0.08);transition:border 0.2s;resize:vertical;"></textarea>
+                <button onclick="sendMessage()" aria-label="Send" title="Send" style="margin-left:8px;display:flex;align-items:center;justify-content:center;width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#7c4dff 0%,#5e35b1 100%);border:none;box-shadow:0 2px 8px rgba(92,62,255,0.15);cursor:pointer;">
+                    <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <polygon points="7,24 21,14 7,4" fill="white"/>
+                    </svg>
+                </button>
                 <button id="stopBtn" class="stop-generation-btn" onclick="stopGeneration()">⏹ Stop</button>
             </div>
-            <!-- File upload is disabled -->
         </div>
     </div>
     
@@ -616,7 +709,7 @@
                     // Single line breaks
                     .replace(/\n/g, '<br>');
                 
-                // Добавляем кнопку скачивания только если это не режим печати
+                // Add download button only if not in typing mode
                 let downloadBtn = showCursor ? '' : `<br><button class="message-download-btn" onclick="downloadMessage(${idx}, 'ai')">💾 Download</button>`;
                 bubble.innerHTML = `<p>${formatted}${showCursor ? ' <span class="cursor">|</span>' : ''}</p>${downloadBtn}`;
             } else {
@@ -695,8 +788,8 @@
             if (typeof message.message === 'string') {
                 // Remove HTML tags and get plain text
                 textContent = message.message
-                    .replace(/<[^>]*>/g, '') // Убираем HTML теги
-                    .replace(/&bull;/g, '•') // Заменяем HTML entities
+                    .replace(/<[^>]*>/g, '') // Remove HTML tags
+                    .replace(/&bull;/g, '•') // Replace HTML entities
                     .replace(/&amp;/g, '&')
                     .replace(/&lt;/g, '<')
                     .replace(/&gt;/g, '>')
@@ -872,10 +965,10 @@
         }
 
         function startNewChat() {
-            // Создаем новую сессию
+            // Create a new session
             currentSessionId = generateSessionId();
             
-            // Очищаем предыдущую сессию на сервере (опционально)
+            // Optionally clear previous session on server
             fetch("https://gemini-chat-app-h3gp.onrender.com/clear-session", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -898,7 +991,7 @@
             currentChatIdx = idx;
             messages = chatHistory[idx].messages ? chatHistory[idx].messages.slice() : [];
             
-            // Восстанавливаем sessionId для этого чата
+            // Restore sessionId for this chat
             currentSessionId = chatHistory[idx].sessionId || generateSessionId();
             if (!chatHistory[idx].sessionId) {
                 chatHistory[idx].sessionId = currentSessionId;
@@ -957,17 +1050,18 @@
                 formData.append('file', file);
 
                 try {
-                    let response = await fetch("https://gemini-chat-app-h3gp.onrender.com/upload-file", {
+                    let response = await fetch(window.location.origin + "/upload-file", {
                         method: "POST",
                         body: formData
                     });
                     let data = await response.json();
-                    if (data.success) {
+                    if (data.url || data.pdfUrl) {
                         addMessage(`File "${file.name}" successfully uploaded to server.`, 'ai');
                         // If it's a PDF, show <iframe> and text
                         if (file.type === 'application/pdf' || /\.pdf$/i.test(file.name)) {
-                            if (data.pdfUrl) {
-                                addMessage(`<b>Original PDF:</b><br><iframe src="https://gemini-chat-app-h3gp.onrender.com${data.pdfUrl}" width="100%" height="500px" style="border:1px solid #555;border-radius:8px;background:#222;"></iframe>`, 'ai');
+                            if (data.url || data.pdfUrl) {
+                                const pdfUrl = data.url || data.pdfUrl;
+                                addMessage(`<b>Original PDF:</b><br><iframe src="${window.location.origin}${pdfUrl}" width="100%" height="500px" style="border:1px solid #555;border-radius:8px;background:#222;"></iframe>`, 'ai');
                             }
                             if (data.text) {
                                 addMessage(`<b>Extracted text from PDF:</b><br><pre>${escapeHtml(data.text.slice(0, 5000))}${data.text.length > 5000 ? '\n... (truncated)' : ''}</pre><button class="download-btn" onclick="sendPdfTextToGemini('${escapeHtml(data.text.slice(0, 10000))}')">Send text to Gemini</button>`, 'ai');
@@ -985,23 +1079,6 @@
             input.value = '';
         }
 
-            // Function to send PDF text to Gemini
-        window.sendPdfTextToGemini = function(text) {
-            if (!text) return;
-            // Send text as a question
-            fetch("https://gemini-chat-app-h3gp.onrender.com/ask", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ question: text, sessionId: currentSessionId })
-            })
-            .then(res => res.json())
-            .then(data => {
-                addMessage(`<b>Gemini response to PDF text:</b><br>${escapeHtml(data.reply)}`, 'ai');
-            })
-            .catch(() => {
-                addMessage("Connection error with Gemini when sending PDF text.", 'ai');
-            });
-        }
     </script>
 </body>
 </html>
