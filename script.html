@@ -378,16 +378,16 @@
         </button>
                 <button id="stopBtn" class="stop-generation-btn" onclick="stopGeneration()">⏹ Stop</button>
             </div>
-            <!-- Загрузка файлов отключена -->
+            <!-- File upload is disabled -->
         </div>
     </div>
     
-    <!-- Кнопка для скачивания выделенного текста -->
+    <!-- Button for downloading selected text -->
     <button id="downloadSelectionBtn" class="download-selection-btn" onclick="downloadSelection()">
         Download Selected Text
     </button>
     <script>
-    // Скрытие/открытие боковой панели
+    // Show/hide sidebar
     function toggleSidebar() {
         const sidebar = document.getElementById('sidebar');
         const main = document.getElementById('main-container');
@@ -412,14 +412,14 @@
         let shouldStopGeneration = false;
         let currentTypingController = null;
         
-        // Генерируем уникальный ID сессии для каждого чата
+    // Generate unique session ID for each chat
         let currentSessionId = generateSessionId();
         
         function generateSessionId() {
             return 'session-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
         }
 
-        // Показать/скрыть кнопку остановки
+    // Show/hide stop button
         function showStopButton(show) {
             const stopBtn = document.getElementById('stopBtn');
             if (show) {
@@ -429,7 +429,7 @@
             }
         }
 
-        // Остановить генерацию
+    // Stop generation
         function stopGeneration() {
             shouldStopGeneration = true;
             if (currentTypingController) {
@@ -502,7 +502,7 @@
                 i++;
             }
             
-            // Если остановлено пользователем, добавляем индикатор
+            // If stopped by user, add indicator
             if (shouldStopGeneration) {
                 messages[idx].message = current + "\n\n[Генерация остановлена]";
             } else {
@@ -522,7 +522,7 @@
             renderMessages();
         }
 
-        // Example: How to render a structured AI answer with bullets, headings, paragraphs, and emoji
+    // Example: How to render a structured AI answer with bullets, headings, paragraphs, and emoji
         async function showStructureExample() {
             const example = `
 <b>📝 What I choose and how it's called:</b>
@@ -654,7 +654,7 @@
         }
     });
 
-        // Helper to escape HTML in code blocks
+    // Helper to escape HTML in code blocks
         function escapeHtml(str) {
             return str.replace(/[&<>"']/g, function(m) {
                 return ({
@@ -667,7 +667,7 @@
             });
         }
 
-        // Download code block as file
+    // Download code block as file
         window.downloadCode = function(codeId, lang) {
             const codeElem = document.getElementById(codeId);
             if (!codeElem) return;
@@ -693,7 +693,7 @@
             
             let textContent = '';
             if (typeof message.message === 'string') {
-                // Убираем HTML теги и получаем чистый текст
+                // Remove HTML tags and get plain text
                 textContent = message.message
                     .replace(/<[^>]*>/g, '') // Убираем HTML теги
                     .replace(/&bull;/g, '•') // Заменяем HTML entities
@@ -745,11 +745,11 @@
                 URL.revokeObjectURL(a.href);
             }, 100);
             
-            // Скрываем кнопку после скачивания
+            // Hide button after download
             document.getElementById('downloadSelectionBtn').style.display = 'none';
         }
 
-        // Show/hide download selection button based on text selection
+    // Show/hide download selection button based on text selection
         document.addEventListener('selectionchange', function() {
             const selection = window.getSelection();
             const selectedText = selection.toString().trim();
@@ -759,7 +759,7 @@
                 const range = selection.getRangeAt(0);
                 const rect = range.getBoundingClientRect();
                 
-                // Показываем кнопку рядом с выделенным текстом
+                // Show button near selected text
                 downloadBtn.style.display = 'block';
                 downloadBtn.style.left = Math.min(rect.right + 10, window.innerWidth - 150) + 'px';
                 downloadBtn.style.top = Math.max(rect.top - 30, 10) + 'px';
@@ -768,9 +768,9 @@
             }
         });
 
-        // Горячие клавиши
+    // Hotkeys
         document.addEventListener('keydown', function(e) {
-            // Escape для остановки генерации
+            // Escape to stop generation
             if (e.key === 'Escape') {
                 e.preventDefault();
                 if (isAITyping) {
@@ -778,7 +778,7 @@
                 }
             }
             
-            // Ctrl+D или Cmd+D для скачивания выделенного текста
+            // Ctrl+D or Cmd+D to download selected text
             if ((e.ctrlKey || e.metaKey) && e.key === 'd') {
                 e.preventDefault();
                 const selection = window.getSelection();
@@ -787,10 +787,10 @@
                 }
             }
             
-            // Ctrl+S или Cmd+S для скачивания последнего ответа AI
+            // Ctrl+S or Cmd+S to download last AI response
             if ((e.ctrlKey || e.metaKey) && e.key === 's') {
                 e.preventDefault();
-                // Найдем последнее сообщение AI
+                // Find last AI message
                 for (let i = messages.length - 1; i >= 0; i--) {
                     if (messages[i].sender === 'ai') {
                         downloadMessage(i, 'ai');
@@ -800,8 +800,8 @@
             }
         });
 
-        // Chat history logic
-        // Always keep chatHistory and currentChatIdx in sync with localStorage
+    // Chat history logic
+    // Always keep chatHistory and currentChatIdx in sync with localStorage
         let chatHistory = [];
         let currentChatIdx = 0;
 
@@ -927,12 +927,12 @@
             renderHistory();
         };
 
-        // On load: initialize chat/history
+    // On load: initialize chat/history
         loadHistory();
         if (chatHistory.length === 0) {
             startNewChat();
         } else {
-            // Убеждаемся, что у всех чатов есть sessionId
+            // Make sure all chats have sessionId
             let needsSave = false;
             chatHistory.forEach(chat => {
                 if (!chat.sessionId) {
@@ -949,7 +949,7 @@
         async function uploadFiles() {
             const input = document.getElementById('fileInput');
             if (!input.files || input.files.length === 0) {
-                alert('Выберите файл для загрузки');
+                alert('Select a file to upload');
                 return;
             }
             for (const file of input.files) {
@@ -963,32 +963,32 @@
                     });
                     let data = await response.json();
                     if (data.success) {
-                        addMessage(`Файл "${file.name}" успешно загружен на сервер.`, 'ai');
-                        // Если это PDF, показываем <iframe> и текст
+                        addMessage(`File "${file.name}" successfully uploaded to server.`, 'ai');
+                        // If it's a PDF, show <iframe> and text
                         if (file.type === 'application/pdf' || /\.pdf$/i.test(file.name)) {
                             if (data.pdfUrl) {
-                                addMessage(`<b>Оригинальный PDF:</b><br><iframe src="https://gemini-chat-app-h3gp.onrender.com${data.pdfUrl}" width="100%" height="500px" style="border:1px solid #555;border-radius:8px;background:#222;"></iframe>`, 'ai');
+                                addMessage(`<b>Original PDF:</b><br><iframe src="https://gemini-chat-app-h3gp.onrender.com${data.pdfUrl}" width="100%" height="500px" style="border:1px solid #555;border-radius:8px;background:#222;"></iframe>`, 'ai');
                             }
                             if (data.text) {
-                                addMessage(`<b>Извлечённый текст из PDF:</b><br><pre>${escapeHtml(data.text.slice(0, 5000))}${data.text.length > 5000 ? '\n... (truncated)' : ''}</pre><button class="download-btn" onclick="sendPdfTextToGemini('${escapeHtml(data.text.slice(0, 10000))}')">Отправить текст в Gemini</button>`, 'ai');
+                                addMessage(`<b>Extracted text from PDF:</b><br><pre>${escapeHtml(data.text.slice(0, 5000))}${data.text.length > 5000 ? '\n... (truncated)' : ''}</pre><button class="download-btn" onclick="sendPdfTextToGemini('${escapeHtml(data.text.slice(0, 10000))}')">Send text to Gemini</button>`, 'ai');
                             }
                         } else if (data.text) {
-                            addMessage(`Содержимое файла:<br><pre>${escapeHtml(data.text.slice(0, 5000))}${data.text.length > 5000 ? '\n... (truncated)' : ''}</pre>`, 'ai');
+                            addMessage(`File content:<br><pre>${escapeHtml(data.text.slice(0, 5000))}${data.text.length > 5000 ? '\n... (truncated)' : ''}</pre>`, 'ai');
                         }
                     } else {
-                        addMessage(`Ошибка загрузки файла "${file.name}": ${data.error || 'unknown error'}`, 'ai');
+                        addMessage(`Error uploading file "${file.name}": ${data.error || 'unknown error'}`, 'ai');
                     }
                 } catch (error) {
-                    addMessage(`Ошибка соединения при загрузке файла "${file.name}".`, 'ai');
+                    addMessage(`Connection error while uploading file "${file.name}".`, 'ai');
                 }
             }
             input.value = '';
         }
 
-        // Функция для отправки текста PDF в Gemini
+            // Function to send PDF text to Gemini
         window.sendPdfTextToGemini = function(text) {
             if (!text) return;
-            // Отправляем текст как вопрос
+            // Send text as a question
             fetch("https://gemini-chat-app-h3gp.onrender.com/ask", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -996,10 +996,10 @@
             })
             .then(res => res.json())
             .then(data => {
-                addMessage(`<b>Ответ Gemini на текст PDF:</b><br>${escapeHtml(data.reply)}`, 'ai');
+                addMessage(`<b>Gemini response to PDF text:</b><br>${escapeHtml(data.reply)}`, 'ai');
             })
             .catch(() => {
-                addMessage("Ошибка соединения с Gemini при отправке текста PDF.", 'ai');
+                addMessage("Connection error with Gemini when sending PDF text.", 'ai');
             });
         }
     </script>
