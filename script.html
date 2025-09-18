@@ -452,7 +452,7 @@
             showStopButton(true);
             try {
                 currentTypingController = new AbortController();
-                let response = await fetch("http://localhost:3000/ask", {
+                let response = await fetch("https://gemini-chat-app-h3gp.onrender.com/ask", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ 
@@ -876,7 +876,7 @@
             currentSessionId = generateSessionId();
             
             // Очищаем предыдущую сессию на сервере (опционально)
-            fetch("http://localhost:3000/clear-session", {
+            fetch("https://gemini-chat-app-h3gp.onrender.com/clear-session", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ sessionId: currentSessionId })
@@ -957,7 +957,7 @@
                 formData.append('file', file);
 
                 try {
-                    let response = await fetch("http://localhost:3000/upload-file", {
+                    let response = await fetch("https://gemini-chat-app-h3gp.onrender.com/upload-file", {
                         method: "POST",
                         body: formData
                     });
@@ -967,7 +967,7 @@
                         // Если это PDF, показываем <iframe> и текст
                         if (file.type === 'application/pdf' || /\.pdf$/i.test(file.name)) {
                             if (data.pdfUrl) {
-                                addMessage(`<b>Оригинальный PDF:</b><br><iframe src="http://localhost:3000${data.pdfUrl}" width="100%" height="500px" style="border:1px solid #555;border-radius:8px;background:#222;"></iframe>`, 'ai');
+                                addMessage(`<b>Оригинальный PDF:</b><br><iframe src="https://gemini-chat-app-h3gp.onrender.com${data.pdfUrl}" width="100%" height="500px" style="border:1px solid #555;border-radius:8px;background:#222;"></iframe>`, 'ai');
                             }
                             if (data.text) {
                                 addMessage(`<b>Извлечённый текст из PDF:</b><br><pre>${escapeHtml(data.text.slice(0, 5000))}${data.text.length > 5000 ? '\n... (truncated)' : ''}</pre><button class="download-btn" onclick="sendPdfTextToGemini('${escapeHtml(data.text.slice(0, 10000))}')">Отправить текст в Gemini</button>`, 'ai');
@@ -989,7 +989,7 @@
         window.sendPdfTextToGemini = function(text) {
             if (!text) return;
             // Отправляем текст как вопрос
-            fetch("http://localhost:3000/ask", {
+            fetch("https://gemini-chat-app-h3gp.onrender.com/ask", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ question: text, sessionId: currentSessionId })
