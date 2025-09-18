@@ -1,3 +1,4 @@
+
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
@@ -6,6 +7,9 @@ import OpenAI from "openai";
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 dotenv.config();
 
@@ -205,6 +209,15 @@ app.post('/generate-image', async (req, res) => {
 });
 
 // Эндпоинт загрузки файлов отключён
+
+
+// Отдаём все статические файлы из корня проекта
+app.use(express.static(__dirname));
+
+// Главная страница — script.html
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'script.html'));
+});
 
 app.use('/uploads', express.static(uploadDir));
 
