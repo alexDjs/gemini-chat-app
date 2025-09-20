@@ -7,9 +7,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/awesomplete/1.1.5/awesomplete.min.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/awesomplete/1.1.5/awesomplete.min.js"></script>
     <style>
-        body { 
-            font-family: Arial, sans-serif; 
-            text-align: center; 
+        /* --- General Body Styles --- */
+        body {  
+            font-family: Arial, sans-serif;  
+            text-align: center;  
             margin: 0;
             padding: 0;
             height: 100vh;
@@ -19,6 +20,7 @@
             overflow: hidden;
             position: relative;
         }
+
         #background-video {
             position: fixed;
             top: 0; left: 0;
@@ -29,38 +31,16 @@
             z-index: -1;
             object-fit: cover;
         }
+
         #layout {
             display: flex;
             height: 100vh;
             transition: all 0.3s;
         }
-            @media (max-width: 600px) {
-                #input-area {
-                    margin-bottom: 33vw;
-                }
-            }
+
         #sidebar {
             width: 220px;
             min-width: 220px;
-            transition: width 0.3s, min-width 0.3s;
-        }
-        #sidebar.closed {
-            width: 0;
-            min-width: 0;
-            overflow: hidden;
-            border-right: none;
-            padding: 0;
-        }
-        #main-container {
-            transition: all 0.3s;
-        }
-        #main-container.full {
-            margin-left: 0 !important;
-            width: 100vw !important;
-            max-width: 100vw !important;
-        }
-        #sidebar {
-            width: 220px;
             background: #181828;
             color: #fff;
             display: flex;
@@ -69,63 +49,17 @@
             padding: 0;
             border-right: 1px solid #333;
             z-index: 2;
+            transition: width 0.3s, min-width 0.3s;
         }
-        #sidebar h3 {
-            margin: 20px 0 10px 0;
-            font-size: 18px;
-            text-align: center;
-            color: #bdbdfc;
+
+        #sidebar.closed {
+            width: 0;
+            min-width: 0;
+            overflow: hidden;
+            border-right: none;
+            padding: 0;
         }
-        #sidebar button {
-            margin: 10px 16px 10px 16px;
-            padding: 8px 0;
-            font-size: 15px;
-            background: #5e35b1;
-            color: #fff;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-        }
-        #sidebar button:hover {
-            background: #512da8;
-        }
-        #history-list {
-            flex: 1 1 auto;
-            overflow-y: auto;
-            margin: 0 0 10px 0;
-            padding: 0 10px;
-        }
-        .history-item {
-            background: none;
-            border: none;
-            color: #bdbdfc;
-            text-align: left;
-            width: 100%;
-            padding: 8px 4px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-            margin-bottom: 2px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .history-item.active, .history-item:hover {
-            background: #29294a;
-            color: #fff;
-        }
-        .delete-history-btn {
-            background: none;
-            border: none;
-            color: #ff6b6b;
-            font-size: 16px;
-            margin-left: 8px;
-            cursor: pointer;
-            padding: 0 4px;
-        }
-        .delete-history-btn:hover {
-            color: #ff2222;
-        }
+
         #main-container {
             position: relative;
             z-index: 1;
@@ -143,9 +77,23 @@
             width: 0;
             flex: 1 1 0;
             justify-content: flex-end;
+            transition: all 0.3s;
         }
+
+        #main-container.full {
+            margin-left: 0 !important;
+            width: 100vw !important;
+            max-width: 100vw !important;
+        }
+
+        #chat-container {
+            position: relative;
+            width: 100%;
+        }
+
+        /* --- Chat Box Styles --- */
         #chatBox { 
-            width: 100%; 
+            width: 100%;
             height: 460px;
             border: 1px solid #55567a;
             padding: 8px;
@@ -153,13 +101,10 @@
             text-align: left;
             box-sizing: border-box;
             overflow-y: auto;
-            min-height: 0;
             color: #fff;
-            min-width: 0;
-            max-width: 100%;
-            word-break: break-word;
-            overflow-wrap: break-word;
         }
+
+        /* --- Input Area --- */
         #input-area {
             display: flex;
             justify-content: center;
@@ -169,6 +114,7 @@
             flex-shrink: 0;
             margin-top: auto;
         }
+
         #userInput {
             width: 70%;
             padding: 10px;
@@ -185,54 +131,12 @@
             max-height: 120px;
             box-sizing: border-box;
         }
-        .message-row {
-            display: flex;
-            margin-bottom: 6px;
+
+        #userInput:focus {
+            border: 1.5px solid #7c4dff;
+            outline: none;
         }
-        .ai-message {
-            justify-content: flex-start;
-        }
-        .user-message {
-            justify-content: flex-end;
-        }
-        .bubble {
-            max-width: 70%;
-            padding: 6px 10px;
-            border-radius: 12px;
-            margin: 0 3px;
-            font-size: 14px;
-            word-break: break-word;
-            overflow-wrap: break-word;
-            min-width: 0;
-        }
-        .bubble.ai {
-            background-color: #3d4355;
-            color: #fff;
-            border-bottom-left-radius: 0;
-        }
-        .bubble.user {
-            background-color: #5e35b1;
-            color: #fff;
-            border-bottom-right-radius: 0;
-        }
-        .label {
-            font-size: 11px;
-            color: #9e9e9e;
-            margin-bottom: 1px;
-        }
-        .ai-label {
-            text-align: left;
-            margin-left: 3px;
-        }
-        .user-label {
-            text-align: right;
-            margin-right: 3px;
-        }
-        h2 {
-            margin: 10px 0 6px 0;
-            font-size: 20px;
-            color: #fff;
-        }
+
         button {
             font-size: 16px;
             padding: 0;
@@ -248,36 +152,13 @@
             box-shadow: 0 2px 8px rgba(92, 62, 255, 0.15);
             transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
         }
+
         button:hover {
             background: linear-gradient(135deg, #512da8 0%, #7c4dff 100%);
             box-shadow: 0 4px 16px rgba(92, 62, 255, 0.25);
             transform: scale(1.08);
         }
-        #userInput {
-            /* Duplicate block removed, all properties consolidated above */
-        }
-        #userInput:focus {
-            border: 1.5px solid #7c4dff;
-            outline: none;
-        }
-        pre, code {
-            background: #23272e;
-            color: #e6e6e6;
-            font-family: 'Fira Mono', 'Consolas', 'Menlo', monospace;
-            font-size: 14px;
-            border-radius: 6px;
-            padding: 8px 12px;
-            margin: 8px 0;
-            display: block;
-            overflow-x: auto;
-        }
-        pre {
-            margin: 8px 0;
-        }
-        code {
-            padding: 2px 6px;
-            display: inline;
-        }
+
         .stop-generation-btn {
             display: none;
             margin: 4px 0 4px 8px;
@@ -290,13 +171,95 @@
             cursor: pointer;
             animation: pulse 1.5s infinite;
         }
+
         .stop-generation-btn:hover {
             background: #ff6666;
         }
+
         @keyframes pulse {
             0% { opacity: 1; }
             50% { opacity: 0.7; }
             100% { opacity: 1; }
+        }
+
+        /* --- Message bubbles --- */
+        .message-row {
+            display: flex;
+            margin-bottom: 6px;
+        }
+
+        .ai-message { justify-content: flex-start; }
+        .user-message { justify-content: flex-end; }
+
+        .bubble {
+            max-width: 70%;
+            padding: 6px 10px;
+            border-radius: 12px;
+            margin: 0 3px;
+            font-size: 14px;
+            word-break: break-word;
+            overflow-wrap: break-word;
+            min-width: 0;
+        }
+
+        .bubble.ai {
+            background-color: #3d4355;
+            color: #fff;
+            border-bottom-left-radius: 0;
+        }
+
+        .bubble.user {
+            background-color: #5e35b1;
+            color: #fff;
+            border-bottom-right-radius: 0;
+        }
+
+        .label {
+            font-size: 11px;
+            color: #9e9e9e;
+            margin-bottom: 1px;
+        }
+
+        .ai-label { text-align: left; margin-left: 3px; }
+        .user-label { text-align: right; margin-right: 3px; }
+
+        pre, code {
+            background: #23272e;
+            color: #e6e6e6;
+            font-family: 'Fira Mono', 'Consolas', 'Menlo', monospace;
+            font-size: 14px;
+            border-radius: 6px;
+            padding: 8px 12px;
+            margin: 8px 0;
+            display: block;
+            overflow-x: auto;
+        }
+
+        pre { margin: 8px 0; }
+        code { padding: 2px 6px; display: inline; }
+
+        /* --- AI thinking glow effect --- */
+        .chat-container-active {
+            border: 2px solid #fff;
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .chat-container-active::before {
+            content: "";
+            position: absolute;
+            top: -2px; left: -2px; right: -2px; bottom: -2px;
+            border-radius: 12px;
+            background: linear-gradient(90deg, red, orange, yellow, red);
+            background-size: 200% 200%;
+            animation: glow 2s linear infinite;
+            z-index: -1;
+        }
+
+        @keyframes glow {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 200% 50%; }
         }
     </style>
 </head>
@@ -305,22 +268,25 @@
         <source src="your-video.mp4" type="video/mp4">
         Your browser does not support video.
     </video>
+
     <div id="layout">
         <div id="sidebar">
-            <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px 0 16px;">
-                <h3 style="margin:0;font-size:18px;color:#bdbdfc;">Chats</h3>
-                <button id="toggleSidebarBtn" class="sidebar-toggle-btn" title="Скрыть чаты" onclick="toggleSidebar()">⮞</button>
-            </div>
+            <h3 style="margin: 20px 0 10px 0; text-align:center;">Chats</h3>
             <button onclick="startNewChat()">+ New Chat</button>
             <div id="history-list"></div>
         </div>
-        <button id="openSidebarBtn" class="sidebar-toggle-btn" title="Открыть чаты" onclick="toggleSidebar()" style="position:fixed;top:18px;left:8px;z-index:1001;display:none;width:40px;height:40px;border-radius:50%;background:#29294a;color:#fff;font-size:22px;border:none;box-shadow:0 2px 8px #222;align-items:center;justify-content:center;cursor:pointer;">⮜</button>
+
         <div id="main-container">
             <h2>Ask a question</h2>
-            <div id="chatBox"></div>
+
+            <!-- Chat container with glow effect -->
+            <div id="chat-container">
+                <div id="chatBox"></div>
+            </div>
+
             <div id="input-area">
-                <textarea id="userInput" placeholder="Type your question..." rows="3" style="width:70%;padding:10px;border-radius:12px;border:1.5px solid #5e35b1;background:#23223a;color:#fff;font-size:15px;box-shadow:0 2px 8px rgba(92,62,255,0.08);transition:border 0.2s;resize:vertical;"></textarea>
-                <button onclick="sendMessage()" aria-label="Send" title="Send" style="margin-left:8px;display:flex;align-items:center;justify-content:center;width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#7c4dff 0%,#5e35b1 100%);border:none;box-shadow:0 2px 8px rgba(92,62,255,0.15);cursor:pointer;">
+                <textarea id="userInput" placeholder="Type your question..." rows="3"></textarea>
+                <button onclick="sendMessage()" aria-label="Send" title="Send">
                     <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <polygon points="7,24 21,14 7,4" fill="white"/>
                     </svg>
@@ -329,129 +295,103 @@
             </div>
         </div>
     </div>
+
     <script>
-        // Show/hide sidebar
+        /* --- Sidebar toggle --- */
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
             const main = document.getElementById('main-container');
-            const closeBtn = document.getElementById('toggleSidebarBtn');
-            const openBtn = document.getElementById('openSidebarBtn');
-            if (sidebar.classList.contains('closed')) {
-                sidebar.classList.remove('closed');
-                main.classList.remove('full');
-                closeBtn.style.display = '';
-                openBtn.style.display = 'none';
-            } else {
-                sidebar.classList.add('closed');
-                main.classList.add('full');
-                closeBtn.style.display = 'none';
-                openBtn.style.display = 'flex';
-            }
+            sidebar.classList.toggle('closed');
+            main.classList.toggle('full');
         }
+
+        /* --- Chat logic --- */
         const MAX_MESSAGES = 10;
         let messages = [];
         let isAITyping = false;
         let typingInterval = null;
         let shouldStopGeneration = false;
         let currentTypingController = null;
-        
-        // Generate unique session ID for each chat
-        let currentSessionId = generateSessionId();
-        
-        function generateSessionId() {
-            return 'session-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+
+        // Generate session ID
+        let currentSessionId = 'session-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+
+        const chatContainer = document.getElementById("chat-container");
+        const chatBox = document.getElementById("chatBox");
+
+        /* --- Functions to enable/disable AI thinking glow --- */
+        function startAIThinking() {
+            chatContainer.classList.add("chat-container-active");
         }
 
-        // Show/hide stop button
+        function stopAIThinking() {
+            chatContainer.classList.remove("chat-container-active");
+        }
+
+        /* --- Show/hide stop button --- */
         function showStopButton(show) {
-            const stopBtn = document.getElementById('stopBtn');
-            if (show) {
-                stopBtn.style.display = 'inline-block';
-            } else {
-                stopBtn.style.display = 'none';
-            }
+            document.getElementById('stopBtn').style.display = show ? 'inline-block' : 'none';
         }
 
-        // Stop generation
+        /* --- Stop AI generation --- */
         function stopGeneration() {
             shouldStopGeneration = true;
-            if (currentTypingController) {
-                currentTypingController.abort();
-            }
+            if (currentTypingController) currentTypingController.abort();
             showStopButton(false);
-            if (isAITyping) {
-                isAITyping = false;
-            }
+            isAITyping = false;
+            stopAIThinking();
         }
 
+        /* --- Send user message and fetch AI response --- */
         async function sendMessage() {
-            let inputElem = document.getElementById("userInput");
-            let input = inputElem.value;
-            if (input.trim() === "") return;
-            if (isAITyping) return;
+            let input = document.getElementById("userInput").value;
+            if (!input.trim() || isAITyping) return;
+
             addMessage(input, 'user');
-            inputElem.value = "";
+            document.getElementById("userInput").value = "";
             shouldStopGeneration = false;
             showStopButton(true);
+            startAIThinking(); // start glow
+
             try {
                 currentTypingController = new AbortController();
                 let response = await fetch("https://gemini-chat-app-h3gp.onrender.com/ask", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        question: input,
-                        sessionId: currentSessionId
-                    }),
+                    body: JSON.stringify({ question: input, sessionId: currentSessionId }),
                     signal: currentTypingController.signal
                 });
                 let data = await response.json();
-                if (!shouldStopGeneration) {
-                    await typeAIMessage(data.reply);
-                }
+                if (!shouldStopGeneration) await typeAIMessage(data.reply);
             } catch (error) {
-                if (error.name === 'AbortError') {
-                    addMessage("Генерация остановлена пользователем.", 'ai');
-                } else {
-                    addMessage("Connection error with server!", 'ai');
-                }
+                if (error.name === 'AbortError') addMessage("Generation stopped by user.", 'ai');
+                else addMessage("Connection error with server!", 'ai');
             } finally {
                 showStopButton(false);
+                stopAIThinking(); // stop glow
                 currentTypingController = null;
             }
         }
 
-        // Typing effect for AI messages
+        /* --- AI typing effect --- */
         async function typeAIMessage(fullText) {
             isAITyping = true;
-            shouldStopGeneration = false;
-            
-            // Add empty AI message first
             messages.push({ message: "", sender: "ai" });
-            if (messages.length > MAX_MESSAGES) {
-                messages = messages.slice(messages.length - MAX_MESSAGES);
-            }
+            if (messages.length > MAX_MESSAGES) messages = messages.slice(-MAX_MESSAGES);
             renderMessages();
 
             let idx = messages.length - 1;
             let current = "";
             let i = 0;
-            
-            // For markdown/code, type raw text, then format at the end
             while (i < fullText.length && !shouldStopGeneration) {
                 current += fullText[i];
                 messages[idx].message = current;
-                renderMessages(true); // true = typing mode
+                renderMessages(true);
                 await new Promise(r => setTimeout(r, 12 + Math.random() * 30));
                 i++;
             }
-            
-            // If stopped by user, add indicator
-            if (shouldStopGeneration) {
-                messages[idx].message = current + "\n\n[Генерация остановлена]";
-            } else {
-                messages[idx].message = fullText;
-            }
-            
+
+            messages[idx].message = shouldStopGeneration ? current + "\n\n[Generation stopped]" : fullText;
             isAITyping = false;
             showStopButton(false);
             renderMessages();
@@ -459,444 +399,9 @@
 
         function addMessage(message, sender) {
             messages.push({ message, sender });
-            if (messages.length > MAX_MESSAGES) {
-                messages = messages.slice(messages.length - MAX_MESSAGES);
-            }
+            if (messages.length > MAX_MESSAGES) messages = messages.slice(-MAX_MESSAGES);
             renderMessages();
         }
-
-        // Track if user is manually scrolling
-        let userIsScrolling = false;
-        let chatBox = null;
 
         function renderMessages(typingMode = false) {
-            chatBox = document.getElementById("chatBox");
-            // Save scroll position and check if user is at the bottom
-            const isAtBottom = chatBox.scrollTop + chatBox.clientHeight >= chatBox.scrollHeight - 5;
-            chatBox.innerHTML = "";
-            messages.forEach(({ message, sender }, idx) => {
-                const row = document.createElement("div");
-                row.classList.add("message-row", sender === 'user' ? "user-message" : "ai-message");
-
-                // Label
-                const label = document.createElement("div");
-                label.classList.add("label", sender === 'user' ? "user-label" : "ai-label");
-                label.textContent = sender === 'user' ? "Me" : "AI";
-
-                // Bubble
-                const bubble = document.createElement("div");
-                bubble.classList.add("bubble", sender);
-
-            if (sender === 'ai' && typeof message === 'string' && /<table|<ul|<b>|<li>|<th>|<tr>|<td>/.test(message)) {
-                // Allow HTML for structured AI answers
-                bubble.innerHTML = message;
-            } else if (sender === 'ai' && typeof message === 'object' && message.type === 'image') {
-                bubble.innerHTML = `<img src="${message.url}" alt="${message.alt}" style="max-width:100%;border-radius:10px;box-shadow:0 2px 8px #000;">`;
-            } else if (sender === 'ai') {
-                // Typing effect: show blinking cursor if still typing last message
-                let showCursor = typingMode && idx === messages.length - 1 && isAITyping;
-                let codeBlocks = [];
-                let formatted = message
-                    .replace(/```([a-zA-Z0-9]*)\n([\s\S]*?)```/g, function(_, lang, code) {
-                        const codeId = `codeblock-${idx}-${codeBlocks.length}`;
-                        codeBlocks.push({ code, lang, codeId });
-                        return `<pre><code id="${codeId}" class="language-${lang}">${escapeHtml(code)}</code></pre>
-                        <button class="download-btn" onclick="downloadCode('${codeId}', '${lang || 'code'}')">Download code</button>`;
-                    })
-                    // Inline code: `code`
-                    .replace(/`([^`\n]+)`/g, '<code>$1</code>')
-                    // Bullet lists
-                    .replace(/\n\s*[-*]\s/g, '<br>&bull; ')
-                    // Paragraphs
-                    .replace(/\n{2,}/g, '</p><p>')
-                    // Single line breaks
-                    .replace(/\n/g, '<br>');
-                
-                // Добавляем кнопку скачивания только если это не режим печати
-                bubble.innerHTML = `<p>${formatted}${showCursor ? ' <span class=\"cursor\">|</span>' : ''}</p>`;
-            } else {
-                bubble.textContent = message;
-            }
-
-                if (sender === 'user') {
-                    row.appendChild(bubble);
-                    row.appendChild(label);
-                } else {
-                    row.appendChild(label);
-                    row.appendChild(bubble);
-                }
-
-                chatBox.appendChild(row);
-            });
-            if (window.Prism) Prism.highlightAll();
-
-            // Only scroll to bottom if user is not scrolling up
-            if (!userIsScrolling && (typingMode || isAtBottom)) {
-                setTimeout(() => {
-                    chatBox.scrollTop = chatBox.scrollHeight;
-                }, 0);
-            }
-        }
-
-        // Detect user scroll
-        document.addEventListener("DOMContentLoaded", () => {
-            chatBox = document.getElementById("chatBox");
-            if (chatBox) {
-                chatBox.addEventListener('scroll', function () {
-                    // If user is not at the bottom, set flag
-                    userIsScrolling = !(chatBox.scrollTop + chatBox.clientHeight >= chatBox.scrollHeight - 5);
-                });
-            }
-        });
-
-        // Helper to escape HTML in code blocks
-        function escapeHtml(str) {
-            return str.replace(/[&<>"']/g, function(m) {
-                return ({
-                    '&': '&amp;',
-                    '<': '&lt;',
-                    '>': '&gt;',
-                    '"': '&quot;',
-                    "'": '&#39;'
-                })[m];
-            });
-        }
-
-    // Download code block as file
-        window.downloadCode = function(codeId, lang) {
-            const codeElem = document.getElementById(codeId);
-            if (!codeElem) return;
-            const code = codeElem.textContent;
-            const blob = new Blob([code], { type: "text/plain" });
-            const a = document.createElement("a");
-            a.href = URL.createObjectURL(blob);
-            a.download = `code.${lang === 'js' ? 'js' : lang === 'python' ? 'py' : lang === 'html' ? 'html' : lang || 'txt'}`;
-            document.body.appendChild(a);
-            a.click();
-            setTimeout(() => {
-                document.body.removeChild(a);
-                URL.revokeObjectURL(a.href);
-            }, 100);
-        }
-
-        // Download AI message as text file
-        window.downloadMessage = function(messageIdx, sender) {
-            if (messageIdx >= messages.length) return;
-            
-            const message = messages[messageIdx];
-            if (message.sender !== sender) return;
-            
-            let textContent = '';
-            if (typeof message.message === 'string') {
-                // Remove HTML tags and get plain text
-                textContent = message.message
-                    .replace(/<[^>]*>/g, '') // Убираем HTML теги
-                    .replace(/&bull;/g, '•') // Заменяем HTML entities
-                    .replace(/&amp;/g, '&')
-                    .replace(/&lt;/g, '<')
-                    .replace(/&gt;/g, '>')
-                    .replace(/&quot;/g, '"')
-                    .replace(/&#39;/g, "'");
-            } else {
-                textContent = JSON.stringify(message.message, null, 2);
-            }
-            
-            const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
-            const filename = `AI_Response_${timestamp}.txt`;
-            
-            const blob = new Blob([textContent], { type: "text/plain; charset=utf-8" });
-            const a = document.createElement("a");
-            a.href = URL.createObjectURL(blob);
-            a.download = filename;
-            document.body.appendChild(a);
-            a.click();
-            setTimeout(() => {
-                document.body.removeChild(a);
-                URL.revokeObjectURL(a.href);
-            }, 100);
-        }
-
-        // Download selected text
-        window.downloadSelection = function() {
-            const selection = window.getSelection();
-            const selectedText = selection.toString().trim();
-            
-            if (!selectedText) {
-                alert('Выберите текст для скачивания');
-                return;
-            }
-            
-            const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
-            const filename = `Selected_Text_${timestamp}.txt`;
-            
-            const blob = new Blob([selectedText], { type: "text/plain; charset=utf-8" });
-            const a = document.createElement("a");
-            a.href = URL.createObjectURL(blob);
-            a.download = filename;
-            document.body.appendChild(a);
-            a.click();
-            setTimeout(() => {
-                document.body.removeChild(a);
-                URL.revokeObjectURL(a.href);
-            }, 100);
-            
-            // Hide button after download
-            document.getElementById('downloadSelectionBtn').style.display = 'none';
-        }
-
-    // Show/hide download selection button based on text selection
-        document.addEventListener('selectionchange', function() {
-            const selection = window.getSelection();
-            const selectedText = selection.toString().trim();
-            const downloadBtn = document.getElementById('downloadSelectionBtn');
-            
-            if (selectedText && selection.rangeCount > 0) {
-                const range = selection.getRangeAt(0);
-                const rect = range.getBoundingClientRect();
-                
-                // Show button near selected text
-                downloadBtn.style.display = 'block';
-                downloadBtn.style.left = Math.min(rect.right + 10, window.innerWidth - 150) + 'px';
-                downloadBtn.style.top = Math.max(rect.top - 30, 10) + 'px';
-            } else {
-                downloadBtn.style.display = 'none';
-            }
-        });
-
-    // Hotkeys
-        document.addEventListener('keydown', function(e) {
-            // Escape to stop generation
-            if (e.key === 'Escape') {
-                e.preventDefault();
-                if (isAITyping) {
-                    stopGeneration();
-                }
-            }
-            
-            // Ctrl+D or Cmd+D to download selected text
-            if ((e.ctrlKey || e.metaKey) && e.key === 'd') {
-                e.preventDefault();
-                const selection = window.getSelection();
-                if (selection.toString().trim()) {
-                    downloadSelection();
-                }
-            }
-            
-            // Ctrl+S or Cmd+S to download last AI response
-            if ((e.ctrlKey || e.metaKey) && e.key === 's') {
-                e.preventDefault();
-                // Find last AI message
-                for (let i = messages.length - 1; i >= 0; i--) {
-                    if (messages[i].sender === 'ai') {
-                        downloadMessage(i, 'ai');
-                        break;
-                    }
-                }
-            }
-        });
-
-    // Chat history logic
-    // Always keep chatHistory and currentChatIdx in sync with localStorage
-        let chatHistory = [];
-        let currentChatIdx = 0;
-
-        function saveHistory() {
-            localStorage.setItem('chatHistory', JSON.stringify(chatHistory));
-            localStorage.setItem('currentChatIdx', currentChatIdx);
-        }
-
-        function loadHistory() {
-            const stored = localStorage.getItem('chatHistory');
-            chatHistory = stored ? JSON.parse(stored) : [];
-            const idx = parseInt(localStorage.getItem('currentChatIdx'), 10);
-            currentChatIdx = (!isNaN(idx) && idx >= 0 && idx < chatHistory.length) ? idx : 0;
-        }
-
-        function renderHistory() {
-            const list = document.getElementById('history-list');
-            list.innerHTML = '';
-            chatHistory.forEach((chat, idx) => {
-                const itemDiv = document.createElement('div');
-                itemDiv.className = 'history-item' + (idx === currentChatIdx ? ' active' : '');
-
-                const btn = document.createElement('button');
-                btn.className = 'history-item' + (idx === currentChatIdx ? ' active' : '');
-                btn.textContent = chat.title || `Chat ${idx + 1}`;
-                btn.style.flex = "1";
-                btn.onclick = (e) => {
-                    e.stopPropagation();
-                    // Only update messages, do not overwrite chatHistory!
-                    currentChatIdx = idx;
-                    messages = chatHistory[idx].messages ? chatHistory[idx].messages.slice() : [];
-                    renderHistory();
-                    renderMessages();
-                    saveHistory();
-                };
-
-                const delBtn = document.createElement('button');
-                delBtn.className = 'delete-history-btn';
-                delBtn.title = 'Delete chat';
-                delBtn.innerHTML = '&times;';
-                delBtn.onclick = (e) => {
-                    e.stopPropagation();
-                    deleteChat(idx);
-                };
-
-                itemDiv.appendChild(btn);
-                itemDiv.appendChild(delBtn);
-                list.appendChild(itemDiv);
-            });
-        }
-
-        function deleteChat(idx) {
-            if (chatHistory.length === 1) {
-                chatHistory[0].messages = [];
-                chatHistory[0].title = `Chat 1`;
-                currentChatIdx = 0;
-                messages = [];
-            } else {
-                chatHistory.splice(idx, 1);
-                if (currentChatIdx >= chatHistory.length) {
-                    currentChatIdx = chatHistory.length - 1;
-                }
-                messages = chatHistory[currentChatIdx].messages.slice();
-            }
-            saveHistory();
-            renderHistory();
-            renderMessages();
-        }
-
-        function startNewChat() {
-            // Создаем новую сессию
-            currentSessionId = generateSessionId();
-            
-            // Очищаем предыдущую сессию на сервере (опционально)
-            fetch("https://gemini-chat-app-h3gp.onrender.com/clear-session", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ sessionId: currentSessionId })
-            }).catch(e => console.log("Clear session error:", e));
-            
-            chatHistory.push({
-                title: `Chat ${chatHistory.length + 1}`,
-                messages: [],
-                sessionId: currentSessionId
-            });
-            currentChatIdx = chatHistory.length - 1;
-            messages = [];
-            renderHistory();
-            renderMessages();
-            saveHistory();
-        }
-
-        function loadChat(idx) {
-            currentChatIdx = idx;
-            messages = chatHistory[idx].messages ? chatHistory[idx].messages.slice() : [];
-            
-            // Восстанавливаем sessionId для этого чата
-            currentSessionId = chatHistory[idx].sessionId || generateSessionId();
-            if (!chatHistory[idx].sessionId) {
-                chatHistory[idx].sessionId = currentSessionId;
-                saveHistory();
-            }
-            
-            renderHistory();
-            renderMessages();
-            saveHistory();
-        }
-
-        // Patch addMessage to update history
-        const _addMessage = addMessage;
-        addMessage = function(message, sender) {
-            _addMessage(message, sender);
-            if (chatHistory.length === 0) {
-                startNewChat();
-            }
-            chatHistory[currentChatIdx].messages = messages.slice();
-            // Set chat title as first user message
-            if (!chatHistory[currentChatIdx].title && messages.length) {
-                const firstUserMsg = messages.find(m => m.sender === 'user');
-                if (firstUserMsg) chatHistory[currentChatIdx].title = firstUserMsg.message.toString().slice(0, 32);
-            }
-            saveHistory();
-            renderHistory();
-        };
-
-    // On load: initialize chat/history
-        loadHistory();
-        if (chatHistory.length === 0) {
-            startNewChat();
-        } else {
-            // Make sure all chats have sessionId
-            let needsSave = false;
-            chatHistory.forEach(chat => {
-                if (!chat.sessionId) {
-                    chat.sessionId = generateSessionId();
-                    needsSave = true;
-                }
-            });
-            if (needsSave) saveHistory();
-            
-            renderHistory();
-            loadChat(currentChatIdx);
-        }
-
-        async function uploadFiles() {
-            const input = document.getElementById('fileInput');
-            if (!input.files || input.files.length === 0) {
-                alert('Select a file to upload');
-                return;
-            }
-            for (const file of input.files) {
-                const formData = new FormData();
-                formData.append('file', file);
-
-                try {
-                    let response = await fetch("https://gemini-chat-app-h3gp.onrender.com/upload-file", {
-                        method: "POST",
-                        body: formData
-                    });
-                    let data = await response.json();
-                    if (data.success) {
-                        addMessage(`File "${file.name}" successfully uploaded to server.`, 'ai');
-                        // If it's a PDF, show <iframe> and text
-                        if (file.type === 'application/pdf' || /\.pdf$/i.test(file.name)) {
-                            if (data.pdfUrl) {
-                                addMessage(`<b>Original PDF:</b><br><iframe src="https://gemini-chat-app-h3gp.onrender.com${data.pdfUrl}" width="100%" height="500px" style="border:1px solid #555;border-radius:8px;background:#222;"></iframe>`, 'ai');
-                            }
-                            if (data.text) {
-                                addMessage(`<b>Extracted text from PDF:</b><br><pre>${escapeHtml(data.text.slice(0, 5000))}${data.text.length > 5000 ? '\n... (truncated)' : ''}</pre><button class="download-btn" onclick="sendPdfTextToGemini('${escapeHtml(data.text.slice(0, 10000))}')">Send text to Gemini</button>`, 'ai');
-                            }
-                        } else if (data.text) {
-                            addMessage(`File content:<br><pre>${escapeHtml(data.text.slice(0, 5000))}${data.text.length > 5000 ? '\n... (truncated)' : ''}</pre>`, 'ai');
-                        }
-                    } else {
-                        addMessage(`Error uploading file "${file.name}": ${data.error || 'unknown error'}`, 'ai');
-                    }
-                } catch (error) {
-                    addMessage(`Connection error while uploading file "${file.name}".`, 'ai');
-                }
-            }
-            input.value = '';
-        }
-
-            // Function to send PDF text to Gemini
-        window.sendPdfTextToGemini = function(text) {
-            if (!text) return;
-            // Send text as a question
-            fetch("https://gemini-chat-app-h3gp.onrender.com/ask", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ question: text, sessionId: currentSessionId })
-            })
-            .then(res => res.json())
-            .then(data => {
-                addMessage(`<b>Gemini response to PDF text:</b><br>${escapeHtml(data.reply)}`, 'ai');
-            })
-            .catch(() => {
-                addMessage("Connection error with Gemini when sending PDF text.", 'ai');
-            });
-        }
-    </script>
-</body>
-</html>
+            const isAtBottom = chatBox.scrollTop + chatBox
