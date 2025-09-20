@@ -548,3 +548,355 @@
                 });
             }
         });
+
+        // Helper to escape HTML in code blocks
+        function escapeHtml(str) {
+            return str.replace(/[&<>"']/g, function(m) {
+                return ({
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#39;'
+                })[m];
+            });
+        }
+
+    // Download code block as file
+        window.downloadCode = function(codeId, lang) {
+            const codeElem = document.getElementById(codeId);
+            if (!codeElem) return;
+            const code = codeElem.textContent;
+            const blob = new Blob([code], { type: "text/plain" });
+            const a = document.createElement("a");
+            a.href = URL.createObjectURL(blob);
+            a.download = `code.${lang === 'js' ? 'js' : lang === 'python' ? 'py' : lang === 'html' ? 'html' : lang || 'txt'}`;
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(() => {
+                document.body.removeChild(a);
+                URL.revokeObjectURL(a.href);
+            }, 100);
+        }
+
+        // Download AI message as text file
+        window.downloadMessage = function(messageIdx, sender) {
+            if (messageIdx >= messages.length) return;
+            
+            const message = messages[messageIdx];
+            if (message.sender !== sender) return;
+            
+            let textContent = '';
+            if (typeof message.message === 'string') {
+                // Remove HTML tags and get plain text
+                textContent = message.message
+                    .replace(/<[^>]*>/g, '') // Убираем HTML теги
+                    .replace(/&bull;/g, '•') // Заменяем HTML entities
+                    .replace(/&amp;/g, '&')
+                    .replace(/&lt;/g, '<')
+                    .replace(/&gt;/g, '>')
+                    .replace(/&quot;/g, '"')
+                    .replace(/&#39;/g, "'");
+            } else {
+                textContent = JSON.stringify(message.message, null, 2);
+            }
+            
+            const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+            const filename = `AI_Response_${timestamp}.txt`;
+            
+            const blob = new Blob([textContent], { type: "text/plain; charset=utf-8" });
+            const a = document.createElement("a");
+            a.href = URL.createObjectURL(blob);
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(() => {
+                document.body.removeChild(a);
+                URL.revokeObjectURL(a.href);
+            }, 100);
+        }
+
+        // Download selected text
+        window.downloadSelection = function() {
+            const selection = window.getSelection();
+            const selectedText = selection.toString().trim();
+            
+            if (!selectedText) {
+                alert('Выберите текст для скачивания');
+                return;
+            }
+            
+            const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+            const filename = `Selected_Text_${timestamp}.txt`;
+            
+            const blob = new Blob([selectedText], { type: "text/plain; charset=utf-8" });
+            const a = document.createElement("a");
+            a.href = URL.createObjectURL(blob);
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(() => {
+                document.body.removeChild(a);
+                URL.revokeObjectURL(a.href);
+            }, 100);
+            
+            // Hide button after download
+            document.getElementById('downloadSelectionBtn').style.display = 'none';
+        }
+
+    // Show/hide download selection button based on text selection
+        document.addEventListener('selectionchange', function() {
+            const selection = window.getSelection();
+            const selectedText = selection.toString().trim();
+            const downloadBtn = document.getElementById('downloadSelectionBtn');
+            
+            if (selectedText && selection.rangeCount > 0) {
+                const range = selection.getRangeAt(0);
+                const rect = range.getBoundingClientRect();
+                
+                // Show button near selected text
+                downloadBtn.style.display = 'block';
+                downloadBtn.style.left = Math.min(rect.right + 10, window.innerWidth - 150) + 'px';
+                downloadBtn.style.top = Math.max(rect.top - 30, 10) + 'px';
+            } else {
+                downloadBtn.style.display = 'none';
+            }
+        });
+
+    // Hotkeys
+        document.addEventListener('keydown', function(e) {
+            // Escape to stop generation
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                if (isAITyping) {
+                    stopGeneration();
+                }
+            }
+            
+            // Ctrl+D or Cmd+D to download selected text
+            if ((e.ctrlKey || e.metaKey) && e.key === 'd') {
+                e.preventDefault();
+                const selection = window.getSelection();
+                if (selection.toString().trim()) {
+                    downloadSelection();
+                }
+            }
+            
+            // Ctrl+S or Cmd+S to download last AI response
+            if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                e.preventDefault();
+                // Find last AI message
+                for (let i = messages.length - 1; i >= 0; i--) {
+                    if (messages[i].sender === 'ai') {
+                        downloadMessage(i, 'ai');
+                        break;
+                    }
+                }
+            }
+        });
+
+    // Chat history logic
+    // Always keep chatHistory and currentChatIdx in sync with localStorage
+        let chatHistory = [];
+        let currentChatIdx = 0;
+
+        function saveHistory() {
+            localStorage.setItem('chatHistory', JSON.stringify(chatHistory));
+            localStorage.setItem('currentChatIdx', currentChatIdx);
+        }
+
+        function loadHistory() {
+            const stored = localStorage.getItem('chatHistory');
+            chatHistory = stored ? JSON.parse(stored) : [];
+            const idx = parseInt(localStorage.getItem('currentChatIdx'), 10);
+            currentChatIdx = (!isNaN(idx) && idx >= 0 && idx < chatHistory.length) ? idx : 0;
+        }
+
+        function renderHistory() {
+            const list = document.getElementById('history-list');
+            list.innerHTML = '';
+            chatHistory.forEach((chat, idx) => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'history-item' + (idx === currentChatIdx ? ' active' : '');
+
+                const btn = document.createElement('button');
+                btn.className = 'history-item' + (idx === currentChatIdx ? ' active' : '');
+                btn.textContent = chat.title || `Chat ${idx + 1}`;
+                btn.style.flex = "1";
+                btn.onclick = (e) => {
+                    e.stopPropagation();
+                    // Only update messages, do not overwrite chatHistory!
+                    currentChatIdx = idx;
+                    messages = chatHistory[idx].messages ? chatHistory[idx].messages.slice() : [];
+                    renderHistory();
+                    renderMessages();
+                    saveHistory();
+                };
+
+                const delBtn = document.createElement('button');
+                delBtn.className = 'delete-history-btn';
+                delBtn.title = 'Delete chat';
+                delBtn.innerHTML = '&times;';
+                delBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    deleteChat(idx);
+                };
+
+                itemDiv.appendChild(btn);
+                itemDiv.appendChild(delBtn);
+                list.appendChild(itemDiv);
+            });
+        }
+
+        function deleteChat(idx) {
+            if (chatHistory.length === 1) {
+                chatHistory[0].messages = [];
+                chatHistory[0].title = `Chat 1`;
+                currentChatIdx = 0;
+                messages = [];
+            } else {
+                chatHistory.splice(idx, 1);
+                if (currentChatIdx >= chatHistory.length) {
+                    currentChatIdx = chatHistory.length - 1;
+                }
+                messages = chatHistory[currentChatIdx].messages.slice();
+            }
+            saveHistory();
+            renderHistory();
+            renderMessages();
+        }
+
+        function startNewChat() {
+            // Создаем новую сессию
+            currentSessionId = generateSessionId();
+            
+            // Очищаем предыдущую сессию на сервере (опционально)
+            fetch("https://gemini-chat-app-h3gp.onrender.com/clear-session", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ sessionId: currentSessionId })
+            }).catch(e => console.log("Clear session error:", e));
+            
+            chatHistory.push({
+                title: `Chat ${chatHistory.length + 1}`,
+                messages: [],
+                sessionId: currentSessionId
+            });
+            currentChatIdx = chatHistory.length - 1;
+            messages = [];
+            renderHistory();
+            renderMessages();
+            saveHistory();
+        }
+
+        function loadChat(idx) {
+            currentChatIdx = idx;
+            messages = chatHistory[idx].messages ? chatHistory[idx].messages.slice() : [];
+            
+            // Восстанавливаем sessionId для этого чата
+            currentSessionId = chatHistory[idx].sessionId || generateSessionId();
+            if (!chatHistory[idx].sessionId) {
+                chatHistory[idx].sessionId = currentSessionId;
+                saveHistory();
+            }
+            
+            renderHistory();
+            renderMessages();
+            saveHistory();
+        }
+
+        // Patch addMessage to update history
+        const _addMessage = addMessage;
+        addMessage = function(message, sender) {
+            _addMessage(message, sender);
+            if (chatHistory.length === 0) {
+                startNewChat();
+            }
+            chatHistory[currentChatIdx].messages = messages.slice();
+            // Set chat title as first user message
+            if (!chatHistory[currentChatIdx].title && messages.length) {
+                const firstUserMsg = messages.find(m => m.sender === 'user');
+                if (firstUserMsg) chatHistory[currentChatIdx].title = firstUserMsg.message.toString().slice(0, 32);
+            }
+            saveHistory();
+            renderHistory();
+        };
+
+    // On load: initialize chat/history
+        loadHistory();
+        if (chatHistory.length === 0) {
+            startNewChat();
+        } else {
+            // Make sure all chats have sessionId
+            let needsSave = false;
+            chatHistory.forEach(chat => {
+                if (!chat.sessionId) {
+                    chat.sessionId = generateSessionId();
+                    needsSave = true;
+                }
+            });
+            if (needsSave) saveHistory();
+            
+            renderHistory();
+            loadChat(currentChatIdx);
+        }
+
+        async function uploadFiles() {
+            const input = document.getElementById('fileInput');
+            if (!input.files || input.files.length === 0) {
+                alert('Select a file to upload');
+                return;
+            }
+            for (const file of input.files) {
+                const formData = new FormData();
+                formData.append('file', file);
+
+                try {
+                    let response = await fetch("https://gemini-chat-app-h3gp.onrender.com/upload-file", {
+                        method: "POST",
+                        body: formData
+                    });
+                    let data = await response.json();
+                    if (data.success) {
+                        addMessage(`File "${file.name}" successfully uploaded to server.`, 'ai');
+                        // If it's a PDF, show <iframe> and text
+                        if (file.type === 'application/pdf' || /\.pdf$/i.test(file.name)) {
+                            if (data.pdfUrl) {
+                                addMessage(`<b>Original PDF:</b><br><iframe src="https://gemini-chat-app-h3gp.onrender.com${data.pdfUrl}" width="100%" height="500px" style="border:1px solid #555;border-radius:8px;background:#222;"></iframe>`, 'ai');
+                            }
+                            if (data.text) {
+                                addMessage(`<b>Extracted text from PDF:</b><br><pre>${escapeHtml(data.text.slice(0, 5000))}${data.text.length > 5000 ? '\n... (truncated)' : ''}</pre><button class="download-btn" onclick="sendPdfTextToGemini('${escapeHtml(data.text.slice(0, 10000))}')">Send text to Gemini</button>`, 'ai');
+                            }
+                        } else if (data.text) {
+                            addMessage(`File content:<br><pre>${escapeHtml(data.text.slice(0, 5000))}${data.text.length > 5000 ? '\n... (truncated)' : ''}</pre>`, 'ai');
+                        }
+                    } else {
+                        addMessage(`Error uploading file "${file.name}": ${data.error || 'unknown error'}`, 'ai');
+                    }
+                } catch (error) {
+                    addMessage(`Connection error while uploading file "${file.name}".`, 'ai');
+                }
+            }
+            input.value = '';
+        }
+
+            // Function to send PDF text to Gemini
+        window.sendPdfTextToGemini = function(text) {
+            if (!text) return;
+            // Send text as a question
+            fetch("https://gemini-chat-app-h3gp.onrender.com/ask", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ question: text, sessionId: currentSessionId })
+            })
+            .then(res => res.json())
+            .then(data => {
+                addMessage(`<b>Gemini response to PDF text:</b><br>${escapeHtml(data.reply)}`, 'ai');
+            })
+            .catch(() => {
+                addMessage("Connection error with Gemini when sending PDF text.", 'ai');
+            });
+        }
+    </script>
+</body>
+</html>
