@@ -7,15 +7,82 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/awesomplete/1.1.5/awesomplete.min.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/awesomplete/1.1.5/awesomplete.min.js"></script>
     <style>
+        /* Theme variables */
+        :root {
+            /* Dracula (default) */
+            --font-scale: 1; /* global text scale */
+            --bg: #121212;
+            --main-bg: rgba(18, 18, 18, 0.8);
+            --chat-bg: rgba(19, 17, 39, 0.8);
+            --text: #ffffff;
+            --muted: #9e9e9e;
+            --border: #55567a;
+            --sidebar-bg: #181828;
+            --sidebar-accent: #bdbdfc;
+            --accent-start: #7c4dff;
+            --accent-end: #5e35b1;
+            --bubble-user-bg: #5e35b1;
+            --bubble-user-text: #ffffff;
+            --bubble-ai-bg: #3d4355;
+            --bubble-ai-text: #ffffff;
+            --code-bg: #23272e;
+            --code-text: #e6e6e6;
+            --input-bg: #23223a;
+            --menu-btn-bg: #29294a;
+            --stop-bg: #ff4444;
+        }
+        body.theme-light {
+            --bg: #f5f7fb;
+            --main-bg: rgba(255, 255, 255, 0.9);
+            --chat-bg: #ffffff;
+            --text: #1f2937; /* slate-800 */
+            --muted: #6b7280; /* slate-500 */
+            --border: #d1d5db; /* gray-300 */
+            --sidebar-bg: #f3f4f6; /* gray-100 */
+            --sidebar-accent: #4f46e5; /* indigo-600 */
+            --accent-start: #6366f1; /* indigo-500 */
+            --accent-end: #8b5cf6; /* violet-500 */
+            --bubble-user-bg: #2563eb; /* blue-600 */
+            --bubble-user-text: #ffffff;
+            --bubble-ai-bg: #e9eef9; /* soft blue */
+            --bubble-ai-text: #1f2937;
+            --code-bg: #f3f4f6;
+            --code-text: #111827; /* gray-900 */
+            --input-bg: #ffffff;
+            --menu-btn-bg: #e5e7eb; /* gray-200 */
+            --stop-bg: #ef4444;
+        }
+        body.theme-slate {
+            --bg: #1f232a;
+            --main-bg: rgba(31, 35, 42, 0.9);
+            --chat-bg: #242a33;
+            --text: #e5e7eb;
+            --muted: #9aa3b2;
+            --border: #3b4150;
+            --sidebar-bg: #2a2f3a;
+            --sidebar-accent: #c7d2fe; /* indigo-200 */
+            --accent-start: #6b7280; /* slate-500 */
+            --accent-end: #4b5563; /* slate-600 */
+            --bubble-user-bg: #4b5563; /* slate-600 */
+            --bubble-user-text: #f9fafb; /* gray-50 */
+            --bubble-ai-bg: #374151; /* slate-700 */
+            --bubble-ai-text: #e5e7eb;
+            --code-bg: #2b303a;
+            --code-text: #e5e7eb;
+            --input-bg: #2a2f35;
+            --menu-btn-bg: #343b47;
+            --stop-bg: #f05454;
+        }
         body { 
             font-family: Arial, sans-serif; 
+            font-size: calc(16px * var(--font-scale));
             text-align: center; 
             margin: 0;
             padding: 0;
             height: 100vh;
             box-sizing: border-box;
-            background-color: #121212;
-            color: #fff;
+            background-color: var(--bg);
+            color: var(--text);
             overflow: hidden;
             position: relative;
         }
@@ -36,17 +103,89 @@
         }
             @media (max-width: 600px) {
                 #input-area {
-                    margin-bottom: 33vw;
+                    position: fixed; /* Pin to bottom of the screen */
+                    bottom: 0; /* Touch the bottom edge */
+                    left: 0; /* Touch the left edge */
+                    right: 0; /* Touch the right edge */
+                    width: 100vw; /* Full screen width */
+                    height: 86px; /* Taller input area to create safe margin */
+                    margin: 0; /* Remove outer margins */
+                    padding: 10px; /* Compact inner paddings */
+                    background-color: rgba(18, 18, 18, 0.98) !important; /* Less transparent to avoid background bleed */
+                    box-sizing: border-box;
+                    z-index: 1000; /* Поверх всех элементов */
+                    display: block; /* Only input visible here; buttons float */
+                    position: fixed; /* Container for absolutely-positioned buttons */
+                    align-items: center; /* Vertical alignment of content */
+                    border-top: 2px solid var(--accent-end); /* Visible top border */
+                }
+                /* Плавающие кнопки поверх поля ввода */
+                #input-area .send-btn,
+                #input-area #stopBtn {
+                    position: absolute;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    z-index: 1001;
+                    width: 48px;
+                    height: 48px;
+                }
+                #input-area .send-btn { right: 10px; }
+                #input-area #stopBtn { right: 10px; }
+                #input-area.has-stop .send-btn { right: 62px; }
+
+                #userInput {
+                    width: 100% !important; /* Use full available width */
+                    min-width: 0; /* Allow shrinking without overflow */
+                    margin: 0 !important;
+                    padding-right: 80px !important; /* Reserve space for send button so text never goes underneath */
+                }
+                #input-area.has-stop #userInput { padding-right: 140px !important; }
+                #chatBox {
+                    width: 100vw !important; /* Full screen width */
+                    height: calc(100vh - 86px) !important; /* Full height minus input area */
+                    position: absolute !important; /* Sit behind input area */
+                    top: 0 !important; /* Extend to top */
+                    left: 0 !important; /* Touch left edge */
+                    right: 0 !important; /* Touch right edge */
+                    margin: 0 !important; /* Remove all margins */
+                    padding: 8px !important; /* Only inner paddings */
+                    padding-bottom: 80px !important; /* Bottom reserve so last line is always visible */
+                    box-sizing: border-box !important;
+                    overflow-y: auto !important; /* Enable vertical scrolling */
+                    overflow-x: hidden !important; /* Hide horizontal scroll */
+                    border-bottom: 2px solid var(--border) !important; /* Visible bottom border */
+                    /* Allow smooth scroll and no edge rubber-banding */
+                    scroll-behavior: smooth; /* Smooth by default */
+                    overscroll-behavior-y: contain; /* Prevent bounce at edges */
+                }
+                #main-container {
+                    padding: 0; /* Remove container paddings */
+                    position: relative; /* Required for absolute children */
+                }
+                body {
+                    overflow-x: hidden; /* Hide horizontal scroll */
+                    margin: 0; /* Reset body margins */
+                    padding: 0; /* Reset body paddings */
+                }
+            }
+            @media (min-height: 1000px) {
+                #chatBox {
+                    height: 70vh; /* Taller screens: comfortable viewport */
                 }
             }
         #sidebar {
-            width: 220px;
-            min-width: 220px;
-            transition: width 0.3s, min-width 0.3s;
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: 260px;
+            transform: translateX(0);
+            transition: transform 0.3s ease;
+            z-index: 1002;
+            overflow: visible; /* allow popovers to show */
         }
         #sidebar.closed {
-            width: 0;
-            min-width: 0;
+            transform: translateX(-100%);
             overflow: hidden;
             border-right: none;
             padding: 0;
@@ -60,65 +199,66 @@
             max-width: 100vw !important;
         }
         #sidebar {
-            width: 220px;
-            background: #181828;
-            color: #fff;
+            /* width set in overlay section above */
+            background: var(--sidebar-bg);
+            color: var(--text);
             display: flex;
             flex-direction: column;
             align-items: stretch;
             padding: 0;
-            border-right: 1px solid #333;
-            z-index: 2;
+            border-right: 1px solid var(--border);
+            /* z-index set in overlay section above */
+            position: fixed; /* containing block for popovers */
         }
         #sidebar h3 {
             margin: 20px 0 10px 0;
-            font-size: 18px;
+            font-size: calc(18px * var(--font-scale));
             text-align: center;
-            color: #bdbdfc;
+            color: var(--sidebar-accent);
         }
         #sidebar button {
             margin: 10px 16px 10px 16px;
             padding: 8px 0;
-            font-size: 15px;
-            background: #5e35b1;
+            font-size: calc(15px * var(--font-scale));
+            background: var(--accent-end);
             color: #fff;
             border: none;
             border-radius: 6px;
             cursor: pointer;
         }
         #sidebar button:hover {
-            background: #512da8;
+            background: var(--accent-start);
         }
         #history-list {
             flex: 1 1 auto;
             overflow-y: auto;
             margin: 0 0 10px 0;
-            padding: 0 10px;
+            padding: 0 4px; /* shift items a bit more left */
         }
         .history-item {
             background: none;
             border: none;
-            color: #bdbdfc;
+            color: var(--sidebar-accent);
             text-align: left;
             width: 100%;
-            padding: 8px 4px;
+            padding: 8px 0 8px 12px; /* indent labels by ~12px to shift chat titles slightly right */
             border-radius: 4px;
             cursor: pointer;
-            font-size: 14px;
+            font-size: calc(8px * var(--font-scale));
             margin-bottom: 2px;
             display: flex;
             align-items: center;
             justify-content: space-between;
         }
         .history-item.active, .history-item:hover {
-            background: #29294a;
-            color: #fff;
+            background: var(--menu-btn-bg);
+            color: var(--text);
         }
         .delete-history-btn {
             background: none;
             border: none;
             color: #ff6b6b;
-            font-size: 16px;
+            font-size: calc(16px * var(--font-scale));
             margin-left: 8px;
             cursor: pointer;
             padding: 0 4px;
@@ -135,7 +275,7 @@
             height: 100vh;
             max-width: none;
             margin: 0;
-            background-color: rgba(18, 18, 18, 0.8);
+            background-color: var(--main-bg);
             padding: 20px;
             box-sizing: border-box;
             min-width: 0;
@@ -147,14 +287,14 @@
         #chatBox { 
             width: 100%; 
             height: 460px;
-            border: 1px solid #55567a;
+            border: 1px solid var(--border);
             padding: 8px;
-            background-color: rgba(19, 17, 39, 0.8);
+            background-color: var(--chat-bg);
             text-align: left;
             box-sizing: border-box;
             overflow-y: auto;
             min-height: 0;
-            color: #fff;
+            color: var(--text);
             min-width: 0;
             max-width: 100%;
             word-break: break-word;
@@ -165,19 +305,19 @@
             justify-content: center;
             align-items: center;
             padding: 6px 0 10px 0;
-            background-color: rgba(18, 18, 18, 0.8);
+            background-color: var(--main-bg);
             flex-shrink: 0;
             margin-top: auto;
         }
         #userInput {
             width: 70%;
             padding: 10px;
-            font-size: 15px;
+            font-size: calc(15px * var(--font-scale)) !important;
             margin-right: 12px;
-            background: #23223a;
-            color: #fff;
+            background: var(--input-bg);
+            color: var(--text);
             border-radius: 12px;
-            border: 1.5px solid #5e35b1;
+            border: 1.5px solid var(--accent-end);
             resize: vertical;
             box-shadow: 0 2px 8px rgba(92, 62, 255, 0.08);
             transition: border 0.2s;
@@ -200,24 +340,24 @@
             padding: 6px 10px;
             border-radius: 12px;
             margin: 0 3px;
-            font-size: 14px;
+            font-size: calc(14px * var(--font-scale));
             word-break: break-word;
             overflow-wrap: break-word;
             min-width: 0;
         }
         .bubble.ai {
-            background-color: #3d4355;
-            color: #fff;
+            background-color: var(--bubble-ai-bg);
+            color: var(--bubble-ai-text);
             border-bottom-left-radius: 0;
         }
         .bubble.user {
-            background-color: #5e35b1;
-            color: #fff;
+            background-color: var(--bubble-user-bg);
+            color: var(--bubble-user-text);
             border-bottom-right-radius: 0;
         }
         .label {
-            font-size: 11px;
-            color: #9e9e9e;
+            font-size: calc(11px * var(--font-scale));
+            color: var(--muted);
             margin-bottom: 1px;
         }
         .ai-label {
@@ -230,13 +370,14 @@
         }
         h2 {
             margin: 10px 0 6px 0;
-            font-size: 20px;
+            font-size: calc(20px * var(--font-scale));
             color: #fff;
         }
-        button {
-            font-size: 16px;
+        /* Iconic Send button only (avoid global button hover scaling) */
+        .send-btn {
+            font-size: calc(16px * var(--font-scale));
             padding: 0;
-            background: linear-gradient(135deg, #7c4dff 0%, #5e35b1 100%);
+            background: linear-gradient(135deg, var(--accent-start) 0%, var(--accent-end) 100%);
             color: #fff;
             border: none;
             border-radius: 50%;
@@ -248,23 +389,20 @@
             box-shadow: 0 2px 8px rgba(92, 62, 255, 0.15);
             transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
         }
-        button:hover {
-            background: linear-gradient(135deg, #512da8 0%, #7c4dff 100%);
+        .send-btn:hover {
+            background: linear-gradient(135deg, var(--accent-end) 0%, var(--accent-start) 100%);
             box-shadow: 0 4px 16px rgba(92, 62, 255, 0.25);
             transform: scale(1.08);
         }
-        #userInput {
-            /* Duplicate block removed, all properties consolidated above */
-        }
         #userInput:focus {
-            border: 1.5px solid #7c4dff;
+            border: 1.5px solid var(--accent-start);
             outline: none;
         }
         pre, code {
-            background: #23272e;
-            color: #e6e6e6;
+            background: var(--code-bg);
+            color: var(--code-text);
             font-family: 'Fira Mono', 'Consolas', 'Menlo', monospace;
-            font-size: 14px;
+            font-size: calc(14px * var(--font-scale));
             border-radius: 6px;
             padding: 8px 12px;
             margin: 8px 0;
@@ -279,16 +417,20 @@
             display: inline;
         }
         .stop-generation-btn {
-            display: none;
-            margin: 4px 0 4px 8px;
-            padding: 4px 12px;
-            font-size: 13px;
-            background: #ff4444;
+            display: none; /* toggled to inline-flex in JS */
+            margin: 0 0 0 8px; /* align horizontally with Send */
+            padding: 0 12px; /* compact horizontal padding */
+            height: 40px; /* slightly smaller than 48px send button */
+            font-size: calc(12px * var(--font-scale)); /* a bit smaller text */
+            background: var(--stop-bg);
             color: #fff;
             border: none;
-            border-radius: 5px;
+            border-radius: 20px; /* pill shape */
             cursor: pointer;
             animation: pulse 1.5s infinite;
+            align-items: center; /* when inline-flex */
+            justify-content: center; /* when inline-flex */
+            vertical-align: middle; /* align with adjacent inline elements */
         }
         .stop-generation-btn:hover {
             background: #ff6666;
@@ -298,6 +440,34 @@
             50% { opacity: 0.7; }
             100% { opacity: 1; }
         }
+        .cursor {
+            animation: blink 1s infinite;
+            color: var(--accent-start);
+        }
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+
+    /* Ensure sidebar toggle buttons follow theme even with inline styles */
+        .sidebar-toggle-btn {
+            background: var(--menu-btn-bg) !important;
+            color: var(--text) !important;
+        }
+        /* Menu controls (buttons that open popovers) */
+    .menu-controls { margin: 10px 6px 0 6px; position: relative; transform: translateX(-3mm); } /* move controls further left */
+    .menu-item { width: 100%; height: 36px; border-radius: 6px; border: 1px solid var(--border); background: var(--menu-btn-bg); color: var(--text); padding: 0 8px 0 6px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; font-size: clamp(12px, calc(14px * var(--font-scale)), 16px); box-sizing: border-box; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .menu-item:hover { filter: brightness(1.08); }
+        /* Popover panel */
+    .popover-panel { position: fixed; left: 50%; width: 260px; max-width: 90vw; max-height: 60vh; overflow-y: auto; background: var(--sidebar-bg); color: var(--text); border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 6px 20px rgba(0,0,0,0.25); padding: 8px; display: none; opacity: 0; transform: translate(-50%, -6px); transition: opacity .18s ease, transform .18s ease; z-index: 2000; }
+    .popover-panel.open { display: block; opacity: 1; transform: translate(-50%, 0); }
+    .popover-title { font-size: clamp(11px, calc(12px * var(--font-scale)), 14px); color: var(--muted); margin: 4px 6px 8px 6px; }
+        .popover-options { display: flex; flex-direction: column; gap: 6px; }
+    .popover-option { width: 100%; padding: 6px 10px 6px calc(10px + 1ch); background: var(--menu-btn-bg); color: var(--text); border: 1px solid var(--border); border-radius: 8px; cursor: pointer; text-align: left; font-size: clamp(12px, calc(14px * var(--font-scale)), 16px); box-sizing: border-box; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .popover-option:hover { filter: brightness(1.06); transform: none !important; box-shadow: none !important; }
+        .popover-option.active { outline: 2px solid var(--accent-start); }
+    /* Ensure no hover scaling for menu/popover buttons */
+    .menu-item:hover { transform: none !important; box-shadow: none !important; }
     </style>
 </head>
 <body>
@@ -308,19 +478,41 @@
     <div id="layout">
         <div id="sidebar">
             <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px 0 16px;">
-                <h3 style="margin:0;font-size:18px;color:#bdbdfc;">Chats</h3>
-                <button id="toggleSidebarBtn" class="sidebar-toggle-btn" title="Скрыть чаты" onclick="toggleSidebar()">⮞</button>
+                <h3 style="margin:0;font-size:18px;color:var(--sidebar-accent);">Chats</h3>
+                <button id="toggleSidebarBtn" class="sidebar-toggle-btn" title="Hide chats" onclick="toggleSidebar()">⮜</button>
+            </div>
+            <div class="menu-controls" id="menuControls">
+                <button id="openThemePopover" class="menu-item" type="button" style="padding-left:8px;">🎨 Theme <span>▾</span></button>
+                <div id="themePopover" class="popover-panel">
+                    <div class="popover-title">Select theme</div>
+                    <div class="popover-options">
+                        <button class="popover-option" data-theme="dracula" type="button">&nbsp; Dracula (Dark)</button>
+                        <button class="popover-option" data-theme="light" type="button">&nbsp; Light</button>
+                        <button class="popover-option" data-theme="slate" type="button">&nbsp; Slate Gray</button>
+                    </div>
+                </div>
+
+                <button id="openFontPopover" class="menu-item" type="button" style="margin-top:10px;padding-left:10px;">🔤 Font size <span>▾</span></button>
+                <div id="fontPopover" class="popover-panel">
+                    <div class="popover-title">Select font size</div>
+                    <div class="popover-options">
+                        <button class="popover-option" data-scale="0.9" type="button">&nbsp; Small</button>
+                        <button class="popover-option" data-scale="1" type="button">&nbsp; Normal</button>
+                        <button class="popover-option" data-scale="1.15" type="button">&nbsp; Large</button>
+                        <button class="popover-option" data-scale="1.3" type="button">&nbsp; Extra large</button>
+                    </div>
+                </div>
             </div>
             <button onclick="startNewChat()">+ New Chat</button>
             <div id="history-list"></div>
         </div>
-        <button id="openSidebarBtn" class="sidebar-toggle-btn" title="Открыть чаты" onclick="toggleSidebar()" style="position:fixed;top:18px;left:8px;z-index:1001;display:none;width:40px;height:40px;border-radius:50%;background:#29294a;color:#fff;font-size:22px;border:none;box-shadow:0 2px 8px #222;align-items:center;justify-content:center;cursor:pointer;">⮜</button>
+    <button id="openSidebarBtn" class="sidebar-toggle-btn" title="Open menu" onclick="toggleSidebar()" style="position:fixed;top:10px;left:10px;z-index:1100;display:none;width:40px;height:40px;border-radius:50%;font-size:22px;border:none;box-shadow:0 2px 8px #0008;align-items:center;justify-content:center;cursor:pointer;">☰</button>
         <div id="main-container">
-            <h2>Ask a question</h2>
+            
             <div id="chatBox"></div>
             <div id="input-area">
-                <textarea id="userInput" placeholder="Type your question..." rows="3" style="width:70%;padding:10px;border-radius:12px;border:1.5px solid #5e35b1;background:#23223a;color:#fff;font-size:15px;box-shadow:0 2px 8px rgba(92,62,255,0.08);transition:border 0.2s;resize:vertical;"></textarea>
-                <button onclick="sendMessage()" aria-label="Send" title="Send" style="margin-left:8px;display:flex;align-items:center;justify-content:center;width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#7c4dff 0%,#5e35b1 100%);border:none;box-shadow:0 2px 8px rgba(92,62,255,0.15);cursor:pointer;">
+                <textarea id="userInput" placeholder="Type your question..." rows="3" style="width:70%;padding:10px;border-radius:12px;border:1.5px solid var(--accent-end);background:var(--input-bg);color:var(--text);font-size:15px;box-shadow:0 2px 8px rgba(92,62,255,0.08);transition:border 0.2s;resize:vertical;"></textarea>
+                <button class="send-btn" onclick="sendMessage()" aria-label="Send" title="Send" style="display:flex;align-items:center;justify-content:center;width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--accent-start) 0%,var(--accent-end) 100%);border:none;box-shadow:0 2px 8px rgba(92,62,255,0.15);cursor:pointer;">
                     <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <polygon points="7,24 21,14 7,4" fill="white"/>
                     </svg>
@@ -330,23 +522,80 @@
         </div>
     </div>
     <script>
-        // Show/hide sidebar
+    // Theme switching
+        const THEME_KEY = 'theme';
+        function applyTheme(name) {
+            const b = document.body;
+            b.classList.remove('theme-light', 'theme-slate');
+            if (name === 'light') b.classList.add('theme-light');
+            else if (name === 'slate') b.classList.add('theme-slate');
+            localStorage.setItem(THEME_KEY, name);
+            // Update active state in popover
+            updatePopoverActiveStates();
+        }
+    // Font size scaling
+        const FONT_SCALE_KEY = 'fontScale';
+        function applyFontScale(scale) {
+            const s = String(scale || '1');
+            document.documentElement.style.setProperty('--font-scale', s);
+            try { localStorage.setItem(FONT_SCALE_KEY, s); } catch {}
+            // Update active state in popover
+            updatePopoverActiveStates();
+        }
+        function closeAllPopovers() {
+            document.querySelectorAll('.popover-panel.open').forEach(p => p.classList.remove('open'));
+        }
+        function togglePopover(popoverId, triggerEl) {
+            const el = document.getElementById(popoverId);
+            if (!el) return;
+            const isOpen = el.classList.contains('open');
+            closeAllPopovers();
+            if (!isOpen) {
+                // Position below trigger, horizontally centered in viewport
+                if (triggerEl) {
+                    const rect = triggerEl.getBoundingClientRect();
+                    const top = Math.min(window.innerHeight - 20, rect.bottom + 10);
+                    el.style.top = `${top}px`;
+                }
+                el.classList.add('open');
+            }
+        }
+        function updatePopoverActiveStates() {
+            const theme = localStorage.getItem(THEME_KEY) || 'dracula';
+            document.querySelectorAll('#themePopover .popover-option').forEach(btn => {
+                btn.classList.toggle('active', btn.getAttribute('data-theme') === theme);
+            });
+            const scale = localStorage.getItem(FONT_SCALE_KEY) || '1';
+            document.querySelectorAll('#fontPopover .popover-option').forEach(btn => {
+                btn.classList.toggle('active', btn.getAttribute('data-scale') === scale);
+            });
+        }
+    // Show/hide sidebar
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
-            const main = document.getElementById('main-container');
             const closeBtn = document.getElementById('toggleSidebarBtn');
             const openBtn = document.getElementById('openSidebarBtn');
             if (sidebar.classList.contains('closed')) {
                 sidebar.classList.remove('closed');
-                main.classList.remove('full');
                 closeBtn.style.display = '';
                 openBtn.style.display = 'none';
             } else {
                 sidebar.classList.add('closed');
-                main.classList.add('full');
                 closeBtn.style.display = 'none';
                 openBtn.style.display = 'flex';
             }
+        }
+
+    // Always collapse the sidebar on page load/refresh
+        function collapseSidebarOnLoad() {
+            const sidebar = document.getElementById('sidebar');
+            const closeBtn = document.getElementById('toggleSidebarBtn');
+            const openBtn = document.getElementById('openSidebarBtn');
+            if (!sidebar.classList.contains('closed')) {
+                sidebar.classList.add('closed');
+            }
+            if (closeBtn) closeBtn.style.display = 'none';
+            if (openBtn) openBtn.style.display = 'flex';
         }
         const MAX_MESSAGES = 10;
         let messages = [];
@@ -355,20 +604,23 @@
         let shouldStopGeneration = false;
         let currentTypingController = null;
         
-        // Generate unique session ID for each chat
+    // Generate unique session ID for each chat
         let currentSessionId = generateSessionId();
         
         function generateSessionId() {
             return 'session-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
         }
 
-        // Show/hide stop button
+    // Show/hide stop button
         function showStopButton(show) {
             const stopBtn = document.getElementById('stopBtn');
+            const inputArea = document.getElementById('input-area');
             if (show) {
-                stopBtn.style.display = 'inline-block';
+                stopBtn.style.display = 'inline-flex';
+                if (inputArea) inputArea.classList.add('has-stop');
             } else {
                 stopBtn.style.display = 'none';
+                if (inputArea) inputArea.classList.remove('has-stop');
             }
         }
 
@@ -382,6 +634,28 @@
             if (isAITyping) {
                 isAITyping = false;
             }
+            // Force scroll to show STOP message within the viewport
+            setTimeout(() => {
+                const chatBox = document.getElementById("chatBox");
+                const bottomMargin = 6; // ~2мм от низа, чтобы была видна граница серого фона
+                const targetScroll = chatBox.scrollHeight - chatBox.clientHeight - bottomMargin;
+                chatBox.scrollTo({ top: Math.max(0, targetScroll), behavior: 'smooth' });
+            }, 150);
+        }
+
+        // Предварительно поднимаем вид на предпоследнюю "страницу",
+        // чтобы начало печати не происходило на самом краю низа экрана
+        function preRaiseBeforeTyping() {
+            const chatBox = document.getElementById("chatBox");
+            if (!chatBox) return;
+            const bottomTolerance = 10; // consider the user to be at the bottom
+            const atBottom = chatBox.scrollTop >= (chatBox.scrollHeight - chatBox.clientHeight - bottomTolerance);
+            if (!atBottom) return; // уважаем ручной скролл пользователя
+
+            const preOffset = 9; // small margin (~2mm)
+            let target = chatBox.scrollHeight - 2 * chatBox.clientHeight + preOffset; // предпоследняя страница
+            if (target < 0) target = 0;
+            chatBox.scrollTo({ top: target, behavior: 'smooth' });
         }
 
         async function sendMessage() {
@@ -395,7 +669,7 @@
             showStopButton(true);
             try {
                 currentTypingController = new AbortController();
-                let response = await fetch("https://gemini-chat-app-h3gp.onrender.com/ask", {
+                let response = await fetch("/ask", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
@@ -410,7 +684,7 @@
                 }
             } catch (error) {
                 if (error.name === 'AbortError') {
-                    addMessage("Генерация остановлена пользователем.", 'ai');
+                    addMessage("⏹ <span style='color:#ff4444; font-weight:bold;'>STOP</span> Generation interrupted by user", 'ai');
                 } else {
                     addMessage("Connection error with server!", 'ai');
                 }
@@ -422,6 +696,8 @@
 
         // Typing effect for AI messages
         async function typeAIMessage(fullText) {
+            // Перед началом печати приподнимаем вид, если пользователь был у самого низа
+            preRaiseBeforeTyping();
             isAITyping = true;
             shouldStopGeneration = false;
             
@@ -435,19 +711,26 @@
             let idx = messages.length - 1;
             let current = "";
             let i = 0;
+            let lastScrollUpdate = 0; // Throttle scroll updates
             
             // For markdown/code, type raw text, then format at the end
             while (i < fullText.length && !shouldStopGeneration) {
                 current += fullText[i];
                 messages[idx].message = current;
-                renderMessages(true); // true = typing mode
+                
+                // Update scroll only every ~5 chars or on newline for smoothness
+                if (i % 5 === 0 || fullText[i] === '\n' || Date.now() - lastScrollUpdate > 100) {
+                    renderMessages(true); // true = typing mode
+                    lastScrollUpdate = Date.now();
+                }
+                
                 await new Promise(r => setTimeout(r, 12 + Math.random() * 30));
                 i++;
             }
             
             // If stopped by user, add indicator
             if (shouldStopGeneration) {
-                messages[idx].message = current + "\n\n[Генерация остановлена]";
+                messages[idx].message = current + "\n\n⏹ <span style='color:#ff4444; font-weight:bold;'>STOP</span> Generation interrupted";
             } else {
                 messages[idx].message = fullText;
             }
@@ -455,6 +738,14 @@
             isAITyping = false;
             showStopButton(false);
             renderMessages();
+            
+            // Extra scroll after typing finishes: ~2mm from bottom
+            setTimeout(() => {
+                const chatBox = document.getElementById("chatBox");
+                const bottomMargin = 6; // ~2мм
+                const targetScroll = chatBox.scrollHeight - chatBox.clientHeight - bottomMargin;
+                chatBox.scrollTo({ top: Math.max(0, targetScroll), behavior: 'smooth' });
+            }, 100);
         }
 
         function addMessage(message, sender) {
@@ -472,7 +763,9 @@
         function renderMessages(typingMode = false) {
             chatBox = document.getElementById("chatBox");
             // Save scroll position and check if user is at the bottom
-            const isAtBottom = chatBox.scrollTop + chatBox.clientHeight >= chatBox.scrollHeight - 5;
+            // When detecting "at bottom" use a small delta of 10px
+            const bottomTolerance = 10;
+            let isAtBottom = chatBox.scrollTop + chatBox.clientHeight >= chatBox.scrollHeight - bottomTolerance;
             chatBox.innerHTML = "";
             messages.forEach(({ message, sender }, idx) => {
                 const row = document.createElement("div");
@@ -530,11 +823,15 @@
             });
             if (window.Prism) Prism.highlightAll();
 
-            // Only scroll to bottom if user is not scrolling up
-            if (!userIsScrolling && (typingMode || isAtBottom)) {
+            // Auto-scroll: disabled during typing for smoothness/speed.
+            // Keep auto-scroll ONLY when not typing and the user is at the bottom —
+            // in that case maintain a small ~2mm (6px) offset.
+            if (!userIsScrolling && !typingMode && isAtBottom) {
                 setTimeout(() => {
-                    chatBox.scrollTop = chatBox.scrollHeight;
-                }, 0);
+                    const bottomMargin = 6; // ~2mm after typing
+                    const targetScroll = chatBox.scrollHeight - chatBox.clientHeight - bottomMargin;
+                    chatBox.scrollTop = Math.max(0, targetScroll);
+                }, 20);
             }
         }
 
@@ -543,10 +840,43 @@
             chatBox = document.getElementById("chatBox");
             if (chatBox) {
                 chatBox.addEventListener('scroll', function () {
-                    // If user is not at the bottom, set flag
-                    userIsScrolling = !(chatBox.scrollTop + chatBox.clientHeight >= chatBox.scrollHeight - 5);
+                    // Use a large margin for better visibility
+                    const bottomMargin = 70;
+                    userIsScrolling = !(chatBox.scrollTop + chatBox.clientHeight >= chatBox.scrollHeight - bottomMargin - 10);
                 });
             }
+            // Collapse sidebar immediately on DOM load
+            collapseSidebarOnLoad();
+
+            // Init theme
+            const savedTheme = localStorage.getItem(THEME_KEY) || 'dracula';
+            applyTheme(savedTheme);
+            // Wire popover open buttons
+            const themeBtn = document.getElementById('openThemePopover');
+            if (themeBtn) themeBtn.addEventListener('click', () => togglePopover('themePopover', themeBtn));
+
+            // Init font scale
+            const savedScale = localStorage.getItem(FONT_SCALE_KEY) || '1';
+            applyFontScale(savedScale);
+            const fontBtn = document.getElementById('openFontPopover');
+            if (fontBtn) fontBtn.addEventListener('click', () => togglePopover('fontPopover', fontBtn));
+
+            // Option click handlers
+            document.querySelectorAll('#themePopover .popover-option').forEach(btn => {
+                btn.addEventListener('click', () => { applyTheme(btn.getAttribute('data-theme')); closeAllPopovers(); });
+            });
+            document.querySelectorAll('#fontPopover .popover-option').forEach(btn => {
+                btn.addEventListener('click', () => { applyFontScale(btn.getAttribute('data-scale')); closeAllPopovers(); });
+            });
+
+            // Click outside to close
+            document.addEventListener('click', (e) => {
+                const inside = e.target.closest('#themePopover') || e.target.closest('#fontPopover') || e.target.closest('#menuControls');
+                if (!inside) closeAllPopovers();
+            });
+
+            // Sync active states
+            updatePopoverActiveStates();
         });
 
         // Helper to escape HTML in code blocks
@@ -590,8 +920,8 @@
             if (typeof message.message === 'string') {
                 // Remove HTML tags and get plain text
                 textContent = message.message
-                    .replace(/<[^>]*>/g, '') // Убираем HTML теги
-                    .replace(/&bull;/g, '•') // Заменяем HTML entities
+                    .replace(/<[^>]*>/g, '') // Strip HTML tags
+                    .replace(/&bull;/g, '•') // Replace HTML entities
                     .replace(/&amp;/g, '&')
                     .replace(/&lt;/g, '<')
                     .replace(/&gt;/g, '>')
@@ -622,7 +952,7 @@
             const selectedText = selection.toString().trim();
             
             if (!selectedText) {
-                alert('Выберите текст для скачивания');
+                alert('Select text to download');
                 return;
             }
             
@@ -771,7 +1101,7 @@
             currentSessionId = generateSessionId();
             
             // Очищаем предыдущую сессию на сервере (опционально)
-            fetch("https://gemini-chat-app-h3gp.onrender.com/clear-session", {
+            fetch("/clear-session", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ sessionId: currentSessionId })
@@ -840,6 +1170,8 @@
             renderHistory();
             loadChat(currentChatIdx);
         }
+        // Подстраховка: если скрипт загрузился после DOM, всё равно свернём сайдбар
+        collapseSidebarOnLoad();
 
         async function uploadFiles() {
             const input = document.getElementById('fileInput');
@@ -852,7 +1184,7 @@
                 formData.append('file', file);
 
                 try {
-                    let response = await fetch("https://gemini-chat-app-h3gp.onrender.com/upload-file", {
+                    let response = await fetch("/upload-file", {
                         method: "POST",
                         body: formData
                     });
@@ -862,7 +1194,7 @@
                         // If it's a PDF, show <iframe> and text
                         if (file.type === 'application/pdf' || /\.pdf$/i.test(file.name)) {
                             if (data.pdfUrl) {
-                                addMessage(`<b>Original PDF:</b><br><iframe src="https://gemini-chat-app-h3gp.onrender.com${data.pdfUrl}" width="100%" height="500px" style="border:1px solid #555;border-radius:8px;background:#222;"></iframe>`, 'ai');
+                                addMessage(`<b>Original PDF:</b><br><iframe src="${data.pdfUrl}" width="100%" height="500px" style="border:1px solid #555;border-radius:8px;background:#222;"></iframe>`, 'ai');
                             }
                             if (data.text) {
                                 addMessage(`<b>Extracted text from PDF:</b><br><pre>${escapeHtml(data.text.slice(0, 5000))}${data.text.length > 5000 ? '\n... (truncated)' : ''}</pre><button class="download-btn" onclick="sendPdfTextToGemini('${escapeHtml(data.text.slice(0, 10000))}')">Send text to Gemini</button>`, 'ai');
@@ -884,7 +1216,7 @@
         window.sendPdfTextToGemini = function(text) {
             if (!text) return;
             // Send text as a question
-            fetch("https://gemini-chat-app-h3gp.onrender.com/ask", {
+            fetch("/ask", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ question: text, sessionId: currentSessionId })
