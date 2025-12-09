@@ -113,13 +113,13 @@
                     padding: 10px; /* Compact inner paddings */
                     background-color: rgba(18, 18, 18, 0.98) !important; /* Less transparent to avoid background bleed */
                     box-sizing: border-box;
-                    z-index: 1000; /* Поверх всех элементов */
+                    z-index: 1000; /* On top of all elements */
                     display: block; /* Only input visible here; buttons float */
                     position: fixed; /* Container for absolutely-positioned buttons */
                     align-items: center; /* Vertical alignment of content */
                     border-top: 2px solid var(--accent-end); /* Visible top border */
                 }
-                /* Плавающие кнопки поверх поля ввода */
+                /* Floating buttons above the input field */
                 #input-area .send-btn,
                 #input-area #stopBtn {
                     position: absolute;
@@ -637,23 +637,23 @@
             // Force scroll to show STOP message within the viewport
             setTimeout(() => {
                 const chatBox = document.getElementById("chatBox");
-                const bottomMargin = 6; // ~2мм от низа, чтобы была видна граница серого фона
+                const bottomMargin = 6; // ~2mm from bottom to keep grey border visible
                 const targetScroll = chatBox.scrollHeight - chatBox.clientHeight - bottomMargin;
                 chatBox.scrollTo({ top: Math.max(0, targetScroll), behavior: 'smooth' });
             }, 150);
         }
 
-        // Предварительно поднимаем вид на предпоследнюю "страницу",
-        // чтобы начало печати не происходило на самом краю низа экрана
+        // Pre-scroll to the penultimate "page"
+        // so typing doesn't start at the very bottom edge
         function preRaiseBeforeTyping() {
             const chatBox = document.getElementById("chatBox");
             if (!chatBox) return;
             const bottomTolerance = 10; // consider the user to be at the bottom
             const atBottom = chatBox.scrollTop >= (chatBox.scrollHeight - chatBox.clientHeight - bottomTolerance);
-            if (!atBottom) return; // уважаем ручной скролл пользователя
+            if (!atBottom) return; // respect manual user scroll
 
             const preOffset = 9; // small margin (~2mm)
-            let target = chatBox.scrollHeight - 2 * chatBox.clientHeight + preOffset; // предпоследняя страница
+            let target = chatBox.scrollHeight - 2 * chatBox.clientHeight + preOffset; // penultimate page
             if (target < 0) target = 0;
             chatBox.scrollTo({ top: target, behavior: 'smooth' });
         }
@@ -703,7 +703,7 @@
                 return;
             }
 
-            // Перед началом печати приподнимаем вид, если пользователь был у самого низа
+            // Before typing, lift the view if the user was at the bottom
             preRaiseBeforeTyping();
             isAITyping = true;
             shouldStopGeneration = false;
@@ -749,7 +749,7 @@
             // Extra scroll after typing finishes: ~2mm from bottom
             setTimeout(() => {
                 const chatBox = document.getElementById("chatBox");
-                const bottomMargin = 6; // ~2мм
+                const bottomMargin = 6; // ~2mm
                 const targetScroll = chatBox.scrollHeight - chatBox.clientHeight - bottomMargin;
                 chatBox.scrollTo({ top: Math.max(0, targetScroll), behavior: 'smooth' });
             }, 100);
@@ -812,7 +812,7 @@
                     // Single line breaks
                     .replace(/\n/g, '<br>');
                 
-                // Добавляем кнопку скачивания только если это не режим печати
+                // Add the download button only when not in print mode
                 bubble.innerHTML = `<p>${formatted}${showCursor ? ' <span class=\"cursor\">|</span>' : ''}</p>`;
             } else {
                 bubble.textContent = message;
@@ -1104,10 +1104,10 @@
         }
 
         function startNewChat() {
-            // Создаем новую сессию
+            // Create a new session
             currentSessionId = generateSessionId();
             
-            // Очищаем предыдущую сессию на сервере (опционально)
+            // Clear the previous session on the server (optional)
             fetch("/clear-session", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -1130,7 +1130,7 @@
             currentChatIdx = idx;
             messages = chatHistory[idx].messages ? chatHistory[idx].messages.slice() : [];
             
-            // Восстанавливаем sessionId для этого чата
+            // Restore sessionId for this chat
             currentSessionId = chatHistory[idx].sessionId || generateSessionId();
             if (!chatHistory[idx].sessionId) {
                 chatHistory[idx].sessionId = currentSessionId;
@@ -1177,7 +1177,7 @@
             renderHistory();
             loadChat(currentChatIdx);
         }
-        // Подстраховка: если скрипт загрузился после DOM, всё равно свернём сайдбар
+        // Safety: if script loads after DOM, still collapse the sidebar
         collapseSidebarOnLoad();
 
         async function uploadFiles() {

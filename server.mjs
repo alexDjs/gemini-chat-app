@@ -3,7 +3,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { GoogleGenAI } from '@google/genai';
-import OpenAI from "openai";
+import OpenAI from 'openai';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
@@ -39,30 +39,30 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-// Хранилище для истории чатов по сессиям
+// Session-scoped chat history store
 const chatSessions = new Map();
 
-// Функция для очистки старых сессий (каждые 30 минут)
+// Cleanup stale sessions (every 30 minutes)
 setInterval(() => {
   const now = Date.now();
   for (const [sessionId, session] of chatSessions.entries()) {
-    if (now - session.lastActivity > 30 * 60 * 1000) { // 30 минут
+    if (now - session.lastActivity > 30 * 60 * 1000) { // 30 minutes
       chatSessions.delete(sessionId);
     }
   }
-}, 5 * 60 * 1000); // Проверяем каждые 5 минут
+}, 5 * 60 * 1000); // Check every 5 minutes
 
 app.post('/ask', async (req, res) => {
   let { question, sessionId = 'default' } = req.body;
   if (!question) {
-    return res.status(400).json({ reply: 'Вопрос не получен.' });
+    return res.status(400).json({ reply: 'Question not received.' });
   }
 
   try {
     console.log('Sending question to Gemini:', question);
     console.log('Session ID:', sessionId);
     
-    // Получаем или создаем сессию
+    // Get or create session
     if (!chatSessions.has(sessionId)) {
       chatSessions.set(sessionId, {
         history: [],
@@ -74,22 +74,22 @@ app.post('/ask', async (req, res) => {
     const session = chatSessions.get(sessionId);
     session.lastActivity = Date.now();
 
-    // Добавляем новый вопрос пользователя в историю
-    // Добавляем промпт для структурированного ответа
-    const formattingPrompt = `\n\nПожалуйста, дай ответ в структурированной форме: используй абзацы, списки, выделение, emoji (если уместно), таблицы для сложных данных. Не используй длинные простыни текста. Если есть код — оформи как блок. Если есть пункты — оформи как маркированный или нумерованный список. Если можно, добавь заголовки. Ответ должен быть красивым и легко читаемым.`;
+    // Add the new user question to history
+    // Add prompt asking for structured output
+    const formattingPrompt = `\n\nPlease provide a structured answer: use paragraphs, lists, emphasis, emoji (if appropriate), tables for complex data. Don't use long walls of text. If there's code — format it as a block. If there are points — format as a bulleted or numbered list. If possible, add headings. The answer should be beautiful and easy to read.`;
     session.history.push({
       role: 'user',
       parts: [{ text: question + formattingPrompt }]
     });
 
-    // Ограничиваем историю последними 20 сообщениями (10 пар вопрос-ответ)
+    // Keep only the last 20 messages (10 Q/A pairs)
     if (session.history.length > 20) {
       session.history = session.history.slice(-20);
     }
 
     console.log('Current session history length:', session.history.length);
 
-    // Если это первое сообщение, отправляем просто вопрос
+    // If this is the first message, send the plain question
     if (session.history.length === 1) {
       const response = await ai.models.generateContentStream({
         model: 'gemini-2.0-flash-001',
@@ -103,16 +103,16 @@ app.post('/ask', async (req, res) => {
         }
       }
 
-      // Добавляем ответ AI в историю
+      // Store AI reply in history
       session.history.push({
         role: 'model',
         parts: [{ text: reply }]
       });
 
       console.log('First message reply:', reply.substring(0, 100) + '...');
-      res.json({ reply: reply || 'Нет ответа от Gemini.' });
+      res.json({ reply: reply || 'No response from Gemini.' });
     } else {
-      // Если это не первое сообщение, отправляем всю историю
+      // Otherwise send the full conversation history
       console.log('Sending conversation history to Gemini');
       
       const response = await ai.models.generateContentStream({
@@ -127,24 +127,24 @@ app.post('/ask', async (req, res) => {
         }
       }
 
-      // Добавляем ответ AI в историю
+      // Store AI reply in history
       session.history.push({
         role: 'model',
         parts: [{ text: reply }]
       });
 
       console.log('Context-aware reply:', reply.substring(0, 100) + '...');
-      res.json({ reply: reply || 'Нет ответа от Gemini.' });
+      res.json({ reply: reply || 'No response from Gemini.' });
     }
 
   } catch (e) {
     console.error('AI error:', e);
     console.error('Error details:', e.message, e.stack);
-    res.status(500).json({ reply: 'Ошибка AI или сети: ' + e.message });
+    res.status(500).json({ reply: 'AI or network error: ' + e.message });
   }
 });
 
-// Новый эндпоинт для очистки истории сессии
+// Endpoint to clear a session history
 app.post('/clear-session', (req, res) => {
   const { sessionId = 'default' } = req.body;
   console.log('Clearing session:', sessionId);
@@ -155,7 +155,7 @@ app.post('/clear-session', (req, res) => {
   res.json({ success: true });
 });
 
-// Эндпоинт для отладки сессий
+// Endpoint for session debugging
 app.get('/debug-sessions', (req, res) => {
   const sessionsInfo = {};
   for (const [sessionId, session] of chatSessions.entries()) {
@@ -173,13 +173,13 @@ app.get('/debug-sessions', (req, res) => {
   });
 });
 
-// Тестовый эндпоинт для проверки Gemini API
+// Test endpoint for Gemini API
 app.post('/test-gemini', async (req, res) => {
   const { question } = req.body;
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-2.0-flash-exp',
-      contents: question || 'Привет!',
+      contents: question || 'Hello!',
     });
     const reply = response.text || (response.candidates && response.candidates[0] ? 
       response.candidates[0].content.parts.map(p => p.text).join('\n') : 'No text');
@@ -208,13 +208,13 @@ app.post('/generate-image', async (req, res) => {
   }
 });
 
-// Эндпоинт загрузки файлов отключён
+// File upload endpoint is disabled
 
 
-// Отдаём все статические файлы из корня проекта
+// Serve all static files from project root
 app.use(express.static(__dirname));
 
-// Главная страница — script.html
+// Main page — script.html
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'script.html'));
 });
@@ -222,5 +222,5 @@ app.get('/', (req, res) => {
 app.use('/uploads', express.static(uploadDir));
 
 app.listen(3000, () => {
-  console.log('Сервер запущен на http://localhost:3000');
+  console.log('Server running on http://localhost:3000');
 });
