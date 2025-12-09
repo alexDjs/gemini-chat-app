@@ -286,14 +286,14 @@
         }
         #chatBox { 
             width: 100%; 
-            height: 460px;
+            flex: 1 1 auto; /* take remaining vertical space above input */
+            min-height: 0;
             border: 1px solid var(--border);
             padding: 8px;
             background-color: var(--chat-bg);
             text-align: left;
             box-sizing: border-box;
             overflow-y: auto;
-            min-height: 0;
             color: var(--text);
             min-width: 0;
             max-width: 100%;
@@ -696,6 +696,13 @@
 
         // Typing effect for AI messages
         async function typeAIMessage(fullText) {
+            // If tab is hidden, render full text immediately to avoid throttled timers in background
+            if (document.hidden) {
+                addMessage(fullText, 'ai');
+                showStopButton(false);
+                return;
+            }
+
             // Перед началом печати приподнимаем вид, если пользователь был у самого низа
             preRaiseBeforeTyping();
             isAITyping = true;
@@ -724,7 +731,7 @@
                     lastScrollUpdate = Date.now();
                 }
                 
-                await new Promise(r => setTimeout(r, 12 + Math.random() * 30));
+                await new Promise(r => setTimeout(r, 4 + Math.random() * 12));
                 i++;
             }
             
