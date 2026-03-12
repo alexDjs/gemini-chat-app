@@ -3,21 +3,17 @@
   "name": "gemini-app",
   "version": "1.0.0",
   "scripts": {
-    "start": "node server.mjs",
     "server": "node server.mjs",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "android": "cap sync android && cap open android",
+    "build:android": "cap sync android"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "dependencies": {
-    "@google/genai": "^0.9.0",
+    "@capacitor/android": "^8.0.1",
+    "@capacitor/cli": "^8.0.1",
+    "@capacitor/core": "^8.0.1",
+    "@google/generative-ai": "^0.21.0",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
-    "express": "^5.1.0",
-    "multer": "^1.4.4",
-    "openai": "^5.6.0",
-    "pdf-parse": "^1.1.1",
-    "punycode": "^2.3.1"
+    "express": "^5.1.0"
   }
 }

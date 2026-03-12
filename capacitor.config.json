@@ -1,0 +1,13 @@
+{
+  "appId": "com.gemini.chatapp",
+  "appName": "Gemini Chat",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "http"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 0
+    }
+  }
+}
