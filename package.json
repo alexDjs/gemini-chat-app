@@ -3,6 +3,7 @@
   "name": "gemini-app",
   "version": "1.0.0",
   "scripts": {
+    "start": "node server.mjs",
     "server": "node server.mjs",
     "android": "cap sync android && cap open android",
     "build:android": "cap sync android"
