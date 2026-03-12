@@ -186,6 +186,11 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'www', 'index.html'));
 });
 
+// Health endpoint for deployment platforms.
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok' });
+});
+
 // Start server.
 const PORT = process.env.PORT || 3000;
 
@@ -196,10 +201,15 @@ function startServer() {
 
   server.on('error', (err) => {
     if (err.code === 'EADDRINUSE') {
-      console.log(`⚙️ Port ${PORT} is busy - freeing and restarting...`);
-      exec(`for /f "tokens=5" %a in ('netstat -aon ^| find ":${PORT}" ^| find "LISTENING"') do taskkill /F /PID %a`, () => {
-        setTimeout(startServer, 1000);
-      });
+      if (process.platform === 'win32') {
+        console.log(`⚙️ Port ${PORT} is busy - freeing and restarting...`);
+        exec(`for /f "tokens=5" %a in ('netstat -aon ^| find ":${PORT}" ^| find "LISTENING"') do taskkill /F /PID %a`, () => {
+          setTimeout(startServer, 1000);
+        });
+      } else {
+        console.error(`❌ Port ${PORT} is already in use.`);
+        process.exit(1);
+      }
     } else {
       console.error('❌ Server error:', err.message);
       process.exit(1);
