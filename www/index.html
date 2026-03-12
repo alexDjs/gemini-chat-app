@@ -774,9 +774,10 @@
         let currentTypingController = null;
 
         // API base URL for web/APK.
-        // Browser: same origin (""), Android emulator: host machine via 10.0.2.2.
+        // Browser: same origin (""), Android app: deployed backend URL by default.
         const IS_ANDROID_APP = !!window.Capacitor;
-        const API_BASE_URL = (localStorage.getItem('apiBaseUrl') || '').trim() || (IS_ANDROID_APP ? 'http://10.0.2.2:3000' : '');
+        const DEFAULT_APP_API_URL = 'https://gemini-chat-app-h3gp.onrender.com';
+        const API_BASE_URL = (localStorage.getItem('apiBaseUrl') || '').trim() || (IS_ANDROID_APP ? DEFAULT_APP_API_URL : '');
 
         function apiUrl(path) {
             if (!API_BASE_URL) return path;
